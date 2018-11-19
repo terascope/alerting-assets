@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "xlucene-evaluator": "^0.1.0"
+    "@terascope/job-components": "^0.9.2",
+    "xlucene-evaluator": "^0.2.0"
   }
 }
