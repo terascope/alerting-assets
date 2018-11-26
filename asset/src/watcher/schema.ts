@@ -24,7 +24,7 @@ export default class Schema extends ConvictSchema<WatcherConfig> {
             },
             type_config: {
                 doc: 'if specified it sets describes the types on the incoming records',
-                default: null
+                default: {}
             },
             actions: {
                 doc: 'if specified it sets describes the actions that should occur on matching records',

@@ -1,6 +1,7 @@
 
 import { DocumentMatcher } from 'xlucene-evaluator';
 import { DataEntity } from '@terascope/job-components';
+import { TypeOutput } from '../../interfaces';
 
 export default abstract class FilterBase {
     private documentMatcher: DocumentMatcher
@@ -14,6 +15,6 @@ export default abstract class FilterBase {
     }
 
     abstract validation(data: DataEntity): void
-    abstract output (data: DataEntity): DataEntity
+    abstract output (): null | TypeOutput
     abstract extraction(data: DataEntity): void
 }

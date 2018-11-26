@@ -1,7 +1,7 @@
 
 import FilterBase from './base';
 import { DataEntity } from '@terascope/job-components';
-import { Notifier, MatcherConfig } from '../../interfaces';
+import { Notifier, MatcherConfig, TypeOutput } from '../../interfaces';
 
 //TODO: need story on metadata
 export default class Matcher extends FilterBase implements Notifier {
@@ -22,10 +22,9 @@ export default class Matcher extends FilterBase implements Notifier {
         return true;
     }
 
-    output(): DataEntity {
-        const { results, config } = this;
-        results.setMetadata('actions', config.actions);
-        results.setMetadata('selector', config.selector);
-        return results;
+    output(): null | TypeOutput {
+        const { results } = this;
+        if (results === null) return results;
+        return { data: results, selector: this.config.selector };
     }
 }

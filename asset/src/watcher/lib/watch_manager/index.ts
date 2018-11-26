@@ -3,8 +3,9 @@ import { DataEntity } from '@terascope/job-components';
 import Matcher from './match';
 import fs from 'fs';
 import readline from 'readline';
-import { WatcherConfig, Notifier, MatcherConfig, TransformConfig, NotifyType} from '../../interfaces';
+import { WatcherConfig, Notifier, MatcherConfig, TransformConfig, NotifyType } from '../../interfaces';
 import Transform from './transform';
+import _ from 'lodash';
 
 export default class WatcherManager {
     private watcherList: Notifier[];
@@ -45,7 +46,8 @@ export default class WatcherManager {
     }
 
     private loadExtractor(_config:string) {
-        const config: TransformConfig = JSON.parse(_config);
+        const { opConfig } = this;
+        const config: TransformConfig = _.assign({}, { type: NotifyType.extraction, actions: opConfig.actions }, JSON.parse(_config));
         this.watcherList.push(new Transform(config))
     }
 
@@ -72,18 +74,35 @@ export default class WatcherManager {
     }
 
     //TODO: figure out metadata stuff
-    public run(data: DataEntity): DataEntity[] {
-        return this.watcherList.reduce((alerts: DataEntity[], type: Notifier) => {
-            return data.reduce((alerts: DataEntity[], doc:DataEntity) => {
+    public run(data: DataEntity[]): DataEntity[] {
+        const { opConfig, watcherList } = this;
+
+        return data.reduce((alerts: DataEntity[], doc:DataEntity) => {
+            const recordData = { selector: <string[]>[], results: new DataEntity({}), hasMatch: false };
+            const recordMatches =  watcherList.reduce((data, type) => {
                 if (type.match(doc)) {
+                   
                     type.extraction(doc);
                     //TODO: how should we handle validation issues
                     type.validation(doc);
-                    alerts.push(type.output())
+                    const output = type.output();
+                    if (output !== null) {
+                        data.hasMatch = true;
+                        data.selector.push(output.selector);
+                        data.results = _.merge(data.results, output.data);
+                    }
                 }
-                return alerts;
-            }, alerts)
-            
+                return data;
+            }, recordData);
+
+            if (recordMatches.hasMatch) {
+                const record = recordMatches.results;
+                record.setMetadata('actions', opConfig.actions);
+                record.setMetadata('selector', recordMatches.selector);
+                alerts.push(record);
+            }
+
+            return alerts;
         }, []);
     }
 

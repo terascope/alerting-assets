@@ -1,25 +1,52 @@
 
 import FilterBase from './base';
 import { DataEntity } from '@terascope/job-components';
-import { Notifier, MatcherConfig } from '../../interfaces';
+import { Notifier, TransformConfig, TypeOutput } from '../../interfaces';
+import _ from 'lodash';
 
 //TODO: fix this
 export default class Transform extends FilterBase implements Notifier{
-    private results: DataEntity | object
-    constructor(config: MatcherConfig) {
+    //@ts-ignore
+    private results: object | null;
+    private config: TransformConfig;
+
+    constructor(config: TransformConfig) {
         super(config.selector, config.selector_config);
-        this.results = {};
+        this.config = config;
     }
 
     extraction(doc: DataEntity) {
-        this.results = doc;
+        const { config } = this;
+        let results: object | null = {};
+        let data = doc[config.source_field];
+
+        if (config.regex) {
+            if (data && typeof data === 'string') {
+                const extractedField = data.match(config.regex);
+                if (extractedField) {
+                    _.set(results, config.target_field, extractedField[0])
+                } else {
+                    results = null;
+                }
+            } else {
+                results = null;
+            }
+        } else {
+            _.set(results, config.target_field, data)
+        }
+
+        // const results = {};
+        this.results = results;
     }
 
+    // TODO: flesh this out
     validation():boolean {
         return true;
     }
 
-    output(): DataEntity {
-        return new DataEntity(this.results);
+    output(): null | TypeOutput {
+        const { results } = this;
+        if (results === null) return results;
+        return { data: results, selector: this.config.selector };
     }
 }

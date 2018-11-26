@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@terascope/job-components@^0.9.2":
-  version "0.9.2"
-  resolved "https://registry.yarnpkg.com/@terascope/job-components/-/job-components-0.9.2.tgz#c514da00beb22f611465cf613e38fffad52ca6df"
+"@terascope/job-components@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@terascope/job-components/-/job-components-0.10.0.tgz#35d2d3cfada4255b064e8996b079c831f3c47c02"
   dependencies:
     "@terascope/queue" "^1.1.4"
     convict "^4.4.0"
