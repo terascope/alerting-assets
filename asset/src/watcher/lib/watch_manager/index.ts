@@ -10,13 +10,11 @@ import _ from 'lodash';
 export default class WatcherManager {
     private watcherList: Notifier[];
     private loader: Function;
-   // private watcher: Notifier;
     private opConfig: WatcherConfig;
 
     constructor(opConfig: WatcherConfig) {
         this.watcherList = [];
         this.opConfig = opConfig;
-        //this.watcher = Matcher;
         this.loader = this.determineLoader(opConfig);
     }
 
@@ -38,7 +36,7 @@ export default class WatcherManager {
         const { opConfig } = this;
         const config: MatcherConfig = {
             selector: _config,
-            selector_config: opConfig.type_config,
+            selector_config: opConfig.selector_config,
             type: NotifyType.matcher,
             actions: opConfig.actions
         };
@@ -47,7 +45,15 @@ export default class WatcherManager {
 
     private loadExtractor(_config:string) {
         const { opConfig } = this;
-        const config: TransformConfig = _.assign({}, { type: NotifyType.extraction, actions: opConfig.actions }, JSON.parse(_config));
+        const config: TransformConfig = _.assign(
+            {},
+            {
+                type: NotifyType.extraction,
+                actions: opConfig.actions,
+                selector_config: opConfig.selector_config
+            },
+            JSON.parse(_config)
+        );
         this.watcherList.push(new Transform(config))
     }
 
@@ -81,7 +87,6 @@ export default class WatcherManager {
             const recordData = { selector: <string[]>[], results: new DataEntity({}), hasMatch: false };
             const recordMatches =  watcherList.reduce((data, type) => {
                 if (type.match(doc)) {
-                   
                     type.extraction(doc);
                     //TODO: how should we handle validation issues
                     type.validation(doc);

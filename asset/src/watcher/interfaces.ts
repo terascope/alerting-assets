@@ -31,7 +31,7 @@ export interface WatcherConfig extends OpConfig {
     file_path: string | undefined;
     connection: string | undefined;
     index: string | undefined;
-    type_config: object | undefined;
+    selector_config: object | undefined;
     actions: object[];
 }
 

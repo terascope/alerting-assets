@@ -4,7 +4,7 @@ import { DataEntity } from '@terascope/job-components';
 import { TypeOutput } from '../../interfaces';
 
 export default abstract class FilterBase {
-    private documentMatcher: DocumentMatcher
+    private documentMatcher: DocumentMatcher;
 
     constructor(luceneQuery: string, typeConfigs?: object) {
         this.documentMatcher = new DocumentMatcher(luceneQuery, typeConfigs)

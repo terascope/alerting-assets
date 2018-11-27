@@ -14,13 +14,13 @@ fdescribe('watcher op', () => {
         opTest = opTestHarness({ Processor: Watcher.Processor.default, Schema: Watcher.Schema.default });
     });
 
-    xdescribe('matcher', () => {
+    describe('matcher', () => {
         it('can return matching documents', async () => {
             const opConfig = {
                 _op: 'watcher',
                 file_path: matchRules1Path,
                 type: 'matcher',
-                type_config: { _created: 'date' },
+                selector_config: { _created: 'date' },
             };
     
             const data = DataEntity.makeArray([
@@ -41,7 +41,7 @@ fdescribe('watcher op', () => {
                 _op: 'watcher',
                 file_path: matchRules1Path,
                 type: 'matcher',
-                type_config: { _created: 'date' },
+                selector_config: { _created: 'date' },
                 actions: [{ some: 'actions' }]
             };
     
@@ -68,7 +68,7 @@ fdescribe('watcher op', () => {
                 _op: 'watcher',
                 file_path: matchRules1Path,
                 type: 'matcher',
-                type_config: { _created: 'date' },
+                selector_config: { _created: 'date' },
                 actions: [{ some: 'actions' }]
             }
     
@@ -85,18 +85,18 @@ fdescribe('watcher op', () => {
         });
     })
 
-    fdescribe('can transform data', () => {
+    describe('can transform data', () => {
         it('it can transform matching data', async () => {
             const opConfig = {
                 _op: 'watcher',
                 file_path: extractRules1Path,
                 type: 'transform',
-                type_config: { _created: 'date' },
+                selector_config: { _created: 'date' },
                 actions: ['someActions']
             };
     
             const data = DataEntity.makeArray([
-                { some: 'data', bytes: 1200, myfield: 'hello' },
+                { some: 'data', bytes: 200, myfield: 'hello' },
                 { some: 'data', bytes: 200 },
                 { some: 'other', bytes: 1200 },
                 { other: 'xabcd', myfield: 'hello' },
@@ -105,14 +105,35 @@ fdescribe('watcher op', () => {
 
             const test = await opTest.init({ opConfig });
             const results =  await test.run(data);
-    
-            expect(results.length).toEqual(3);
+
+            expect(results.length).toEqual(1);
             _.each(results, (data) => {
                 expect(DataEntity.isDataEntity(data)).toEqual(true);
                 expect(_.get(data, "topfield.value1")).toEqual('hello');
                 expect(data.getMetadata('actions')).toEqual(opConfig.actions);
                 expect(data.getMetadata('selector')).toBeDefined();
             });
+        });
+
+        it('can uses typeConifg', async () => {
+            const opConfig = {
+                _op: 'watcher',
+                file_path: extractRules1Path,
+                type: 'transform',
+                selector_config: { location: 'geo' },
+                actions: ['someActions']
+            };
+    
+            const data = DataEntity.makeArray([
+                { hostname: "www.other.com", location: '33.435967,  -111.867710 ' }, // true
+                { hostname: "www.example.com", location: '22.435967,-150.867710' }  // false
+            ]);
+
+            const test = await opTest.init({ opConfig });
+            const results =  await test.run(data);
+
+            expect(results.length).toEqual(1);
+            expect(results[0]).toEqual({ point: data[0].location });
         });
 
         it('can work with regex transform queries', async () => {
@@ -131,28 +152,63 @@ fdescribe('watcher op', () => {
 
             const test = await opTest.init({ opConfig });
             const results =  await test.run(data);
+            // NOTE:   "regex": "some.*?$" will give you the entire matched string => wholeRegexResponse
+            // NOTE:   "regex": "some(.*?)$" will give you the captured part of the string => partRegexResponse
 
             expect(results.length).toEqual(1)
-            expect(results[0]).toEqual({ myRegex: 'something' })
+            expect(results[0]).toEqual({ wholeRegexResponse: 'something', partRegexResponse: 'thing' })
         });
 
-        xit('can merge extacted results', async () => {
+        it('can extract using start/end', async () => {
             const opConfig = {
+                _op: 'watcher',
                 file_path: extractRules1Path,
                 type: 'transform',
-                type_config: { _created: 'date' },
+                actions: ['someActions']
+            };
+            // {"selector":"some:data AND bytes:>=1000","source_field":"myfield","start":"field1=","end":"EOP","target_field":"topfield.value1"}
+
+            const data1 = DataEntity.makeArray([
+               { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere&other=things'},
+            ]);
+
+            const data2 = DataEntity.makeArray([
+                { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere'},
+             ]);
+
+            const test = await opTest.init({ opConfig });
+            const results1 =  await test.run(data1);
+
+            expect(results1.length).toEqual(1);
+            expect(results1[0]).toEqual({ topfield: { value1: 'helloThere' } });
+
+            const results2 =  await test.run(data1);
+
+            expect(results2.length).toEqual(1);
+            expect(results2[0]).toEqual({ topfield: { value1: 'helloThere' } });
+        });
+
+        it('can merge extacted results', async () => {
+            const opConfig = {
+                _op: 'watcher',
+                file_path: extractRules1Path,
+                type: 'transform',
                 actions: ['someActions']
             };
     
             const data = DataEntity.makeArray([
-               
+                { hostname: "www.example.com", pathLat: '/path/tiles/latitude/33.435967', pathLon: '/path/tiles/longitude/-111.867710' }, // true
+                { hostname: "www.other.com", location: '33.435967,  -111.867710 ' }, // false
+                { hostname: "www.example.com", location: '22.435967,-150.867710' }  // false
             ]);
 
             const test = await opTest.init({ opConfig });
             const results =  await test.run(data);
-        
+
+            expect(results.length).toEqual(1);
+            expect(results[0]).toEqual({ location: { lat: '33.435967', lon: '-111.867710' } })
         });
+
     });
     //TODO: test validation 
-
 });
