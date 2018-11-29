@@ -7,5 +7,5 @@ export default class Matcher extends FilterBase implements Notifier {
     constructor(config: MatcherConfig);
     extraction(doc: DataEntity): void;
     validation(): boolean;
-    output(): TypeOutput;
+    output(): null | TypeOutput;
 }

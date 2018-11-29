@@ -8,7 +8,7 @@ export default class Watcher extends BatchProcessor<WatcherConfig> {
 
     constructor(context: WorkerContext, opConfig: WatcherConfig, executionConfig: ExecutionConfig) {
         super(context, opConfig, executionConfig);
-        this.watchManager = new WatcherManager(opConfig)
+        this.watchManager = new WatcherManager(opConfig, context.logger)
     }
 
     async initialize() {

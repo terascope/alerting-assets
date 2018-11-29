@@ -4,9 +4,10 @@ const path = require('path');
 const Watcher = require('../asset/src/watcher');
 const _ = require('lodash');
 
-fdescribe('watcher op', () => {
+describe('watcher op', () => {
     const matchRules1Path = path.join(__dirname, './fixtures/matchRules1.txt');
     const extractRules1Path = path.join(__dirname, './fixtures/extractRules1.txt');
+    const extractRules2Path = path.join(__dirname, './fixtures/extractRules2.txt');
 
     let opTest;
 
@@ -33,6 +34,7 @@ fdescribe('watcher op', () => {
     
             const test = await opTest.init({ opConfig });
             const results =  await test.run(data);
+
             expect(results.length).toEqual(3);
         });
 
@@ -80,8 +82,10 @@ fdescribe('watcher op', () => {
 
             const test = await opTest.init({ opConfig });
             const results =  await test.run(data);
-
-            expect(results[0].getMetadata('selector')).toEqual([ 'some:data AND bytes:>=1000', 'other:/.*abc.*/ OR _created:>=2018-11-16T15:16:09.076Z' ])
+            // each match will be inserted into the results
+            expect(results.length).toEqual(2);
+            expect(results[0].getMetadata('selector')).toEqual('some:data AND bytes:>=1000');
+            expect(results[1].getMetadata('selector')).toEqual('other:/.*abc.*/ OR _created:>=2018-11-16T15:16:09.076Z');
         });
     })
 
@@ -166,7 +170,6 @@ fdescribe('watcher op', () => {
                 type: 'transform',
                 actions: ['someActions']
             };
-            // {"selector":"some:data AND bytes:>=1000","source_field":"myfield","start":"field1=","end":"EOP","target_field":"topfield.value1"}
 
             const data1 = DataEntity.makeArray([
                { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere&other=things'},
@@ -208,6 +211,53 @@ fdescribe('watcher op', () => {
             expect(results.length).toEqual(1);
             expect(results[0]).toEqual({ location: { lat: '33.435967', lon: '-111.867710' } })
         });
+
+        it('can use post process operations', async () => {
+            const opConfig = {
+                _op: 'watcher',
+                file_path: extractRules2Path,
+                type: 'transform',
+                actions: ['someActions']
+            };
+    
+            const data = DataEntity.makeArray([
+                { hello: 'world', first: 'John', last: 'Doe'}
+            ]);
+
+            const test = await opTest.init({ opConfig });
+            const results =  await test.run(data);
+
+            expect(results.length).toEqual(1);
+            expect(results[0]).toEqual({ full_name: 'John Doe'})
+        });
+
+       it('false validations remove the fields', async () => {
+            const opConfig = {
+                _op: 'watcher',
+                file_path: extractRules2Path,
+                type: 'transform',
+                actions: ['someActions']
+            };
+    
+            const data = DataEntity.makeArray([
+                { geo: true, lat: '2233', other: 'data'},
+                { geo: true, lon: '2233'}
+            ]);
+
+            const data2 = DataEntity.makeArray([
+                { geo: true, lat: '2233'},
+                { geo: true, lon: '2233'}
+            ]);
+
+            const test = await opTest.init({ opConfig });
+            const results =  await test.run(data);
+
+            expect(results.length).toEqual(1);
+            expect(results[0]).toEqual({ other: 'data' });
+
+            const results2 =  await test.run(data2);
+            expect(results2).toEqual([]);
+        })
 
     });
     //TODO: test validation 

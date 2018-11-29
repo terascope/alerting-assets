@@ -5,6 +5,6 @@ export default abstract class FilterBase {
     constructor(luceneQuery: string, typeConfigs?: object);
     match(doc: DataEntity): boolean;
     abstract validation(data: DataEntity): void;
-    abstract output(): TypeOutput;
+    abstract output(): null | TypeOutput;
     abstract extraction(data: DataEntity): void;
 }

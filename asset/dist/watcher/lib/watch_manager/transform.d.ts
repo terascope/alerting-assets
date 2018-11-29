@@ -7,5 +7,5 @@ export default class Transform extends FilterBase implements Notifier {
     constructor(config: TransformConfig);
     extraction(doc: DataEntity): void;
     validation(): boolean;
-    output(): TypeOutput;
+    output(): null | TypeOutput;
 }

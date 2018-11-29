@@ -19,7 +19,7 @@ export default class Schema extends ConvictSchema<WatcherConfig> {
             doc: string;
             default: string;
         };
-        type_config: {
+        selector_config: {
             doc: string;
             default: {};
         };

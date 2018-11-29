@@ -3,7 +3,6 @@ import FilterBase from './base';
 import { DataEntity } from '@terascope/job-components';
 import { Notifier, MatcherConfig, TypeOutput } from '../../interfaces';
 
-//TODO: need story on metadata
 export default class Matcher extends FilterBase implements Notifier {
     //@ts-ignore
     private results: DataEntity;
@@ -16,10 +15,6 @@ export default class Matcher extends FilterBase implements Notifier {
 
     extraction(doc: DataEntity) {
         this.results = doc;
-    }
-
-    validation():boolean {
-        return true;
     }
 
     output(): null | TypeOutput {

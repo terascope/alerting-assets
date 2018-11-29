@@ -22,8 +22,14 @@ export interface TransformConfig extends MatcherConfig {
     end: string,
     target_field: string;
     regex?: string,
-    validation?: Function;
+    validation?: string;
     decoder?: string
+}
+
+export interface InjectConfig {
+    validation?: string;
+    operation?: string;
+    selector: string;
 }
 
 export interface WatcherConfig extends OpConfig {
@@ -37,7 +43,15 @@ export interface WatcherConfig extends OpConfig {
 
 export interface Notifier {
     match(doc: DataEntity): boolean;
-    validation(data: DataEntity): void;
     output (): null | TypeOutput;
     extraction(doc: DataEntity): void
+}
+
+export interface JoinConfig {
+    selector: string;
+    operation: string;
+    fields: string[];
+    target_field: string;
+    delimiter?: string;
+    remove_source?: boolean
 }

@@ -14,7 +14,6 @@ export default abstract class FilterBase {
         return this.documentMatcher.match(doc);
     }
 
-    abstract validation(data: DataEntity): void
     abstract output (): null | TypeOutput
     abstract extraction(data: DataEntity): void
 }

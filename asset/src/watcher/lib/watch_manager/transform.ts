@@ -4,7 +4,6 @@ import { DataEntity } from '@terascope/job-components';
 import { Notifier, TransformConfig, TypeOutput } from '../../interfaces';
 import _ from 'lodash';
 
-//TODO: fix this
 export default class Transform extends FilterBase implements Notifier{
     //@ts-ignore
     private results: object | null;
@@ -44,11 +43,6 @@ export default class Transform extends FilterBase implements Notifier{
         }
 
         this.results = results;
-    }
-
-    // TODO: flesh this out
-    validation():boolean {
-        return true;
     }
 
     output(): null | TypeOutput {

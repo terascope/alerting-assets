@@ -19,20 +19,26 @@ export interface TransformConfig extends MatcherConfig {
     start: string;
     end: string;
     target_field: string;
-    validation?: Function;
+    regex?: string;
+    validation?: string;
     decoder?: string;
+}
+export interface InjectConfig {
+    validation?: string;
+    operation?: string;
+    selector: string;
 }
 export interface WatcherConfig extends OpConfig {
     type: string;
     file_path: string | undefined;
     connection: string | undefined;
     index: string | undefined;
-    type_config: object | undefined;
+    selector_config: object | undefined;
     actions: object[];
 }
 export interface Notifier {
     match(doc: DataEntity): boolean;
     validation(data: DataEntity): void;
-    output(): TypeOutput;
+    output(): null | TypeOutput;
     extraction(doc: DataEntity): void;
 }
