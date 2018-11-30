@@ -7,7 +7,7 @@ export default class Schema extends ConvictSchema<WatcherConfig> {
         return {
             type: {
                 doc: 'determines if the watcher should return the whole record or transform the returning results',
-                default: 'matcher',
+                default: 'transform',
                 format: ['matcher', 'transform']
             },
             file_path: {

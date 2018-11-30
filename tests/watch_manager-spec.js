@@ -1,11 +1,11 @@
 
 const path = require('path');
-const WatchClass = require('../asset/src/watcher/lib/watch_manager');
+const WatchClass = require('../asset/src/transform/lib/watch_manager');
 const WatchManager = WatchClass.default || WatchClass;
 
 describe('watch_manager', () => {
     const matchRules1Path = path.join(__dirname, './fixtures/matchRules1.txt');
-    const extractRules2Path = path.join(__dirname, './fixtures/extractRules2.txt');
+    const transformRules2Path = path.join(__dirname, './fixtures/transformRules2.txt');
     const logger = {
         info(){},
         error(){}
@@ -26,7 +26,7 @@ describe('watch_manager', () => {
     });
 
     it('it can instantiate a transform with operations from file', async () => {
-        const opConfig = { file_path: extractRules2Path, type: 'transform'}
+        const opConfig = { file_path: transformRules2Path, type: 'transform'}
         let manager;
         expect(() => {
             manager = new WatchManager(opConfig, logger);

@@ -76,7 +76,10 @@ export default class WatcherManager {
           });
         //TODO: error handling here
           return new Promise((resolve) => {
-            rl.on('line', loader);
+            rl.on('line', (str) => {
+                const isComment = str[0] === '#';
+                if (!isComment) loader(str)
+            });
               
             rl.on('close', () => {
                 resolve();
