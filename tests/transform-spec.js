@@ -15,20 +15,19 @@ fdescribe('can transform matches', () => {
         opTest = opTestHarness({ Processor: Transform.Processor.default, Schema: Transform.Schema.default });
     });
 
-    fit('it can transform matching data', async () => {
+    it('it can transform matching data', async () => {
         const opConfig = {
             _op: 'watcher',
             file_path: transformRules1Path,
-            selector_config: { _created: 'date' },
-            actions: ['someActions']
+            selector_config: { _created: 'date' } 
         };
 
         const data = DataEntity.makeArray([
             { some: 'data', bytes: 200, myfield: 'hello' },
-            { some: 'data', bytes: 200 },
-            { some: 'other', bytes: 1200 },
-            { other: 'xabcd', myfield: 'hello' },
-            { _created: "2018-12-16T15:16:09.076Z", myfield: 'hello' }
+            // { some: 'data', bytes: 200 },
+            // { some: 'other', bytes: 1200 },
+            // { other: 'xabcd', myfield: 'hello' },
+            // { _created: "2018-12-16T15:16:09.076Z", myfield: 'hello' }
         ]);
 
         const test = await opTest.init({ opConfig });
@@ -38,8 +37,7 @@ fdescribe('can transform matches', () => {
         _.each(results, (data) => {
             expect(DataEntity.isDataEntity(data)).toEqual(true);
             expect(_.get(data, "topfield.value1")).toEqual('hello');
-            expect(data.getMetadata('actions')).toEqual(opConfig.actions);
-            expect(data.getMetadata('selector')).toBeDefined();
+            expect(data.getMetadata('selectors')).toBeDefined();
         });
     });
 
@@ -47,8 +45,7 @@ fdescribe('can transform matches', () => {
         const opConfig = {
             _op: 'watcher',
             file_path: transformRules1Path,
-            selector_config: { location: 'geo' },
-            actions: ['someActions']
+            selector_config: { location: 'geo' }
         };
 
         const data = DataEntity.makeArray([
@@ -66,8 +63,7 @@ fdescribe('can transform matches', () => {
     it('can work with regex transform queries', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: transformRules1Path,
-            actions: ['someActions']
+            file_path: transformRules1Path
         };
 
         const data = DataEntity.makeArray([
@@ -88,8 +84,7 @@ fdescribe('can transform matches', () => {
     it('can extract using start/end', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: transformRules1Path,
-            actions: ['someActions']
+            file_path: transformRules1Path
         };
 
         const data1 = DataEntity.makeArray([
@@ -97,7 +92,7 @@ fdescribe('can transform matches', () => {
         ]);
 
         const data2 = DataEntity.makeArray([
-            { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere'},
+                { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere'},
             ]);
 
         const test = await opTest.init({ opConfig });
@@ -115,8 +110,7 @@ fdescribe('can transform matches', () => {
     it('can merge extacted results', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: transformRules1Path,
-            actions: ['someActions']
+            file_path: transformRules1Path
         };
 
         const data = DataEntity.makeArray([
@@ -135,8 +129,7 @@ fdescribe('can transform matches', () => {
     it('can use post process operations', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: transformRules2Path,
-            actions: ['someActions']
+            file_path: transformRules2Path
         };
 
         const data = DataEntity.makeArray([
@@ -153,8 +146,7 @@ fdescribe('can transform matches', () => {
     it('false validations remove the fields', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: transformRules2Path,
-            actions: ['someActions']
+            file_path: transformRules2Path
         };
 
         const data = DataEntity.makeArray([
@@ -175,6 +167,5 @@ fdescribe('can transform matches', () => {
 
         const results2 =  await test.run(data2);
         expect(results2).toEqual([]);
-    })
-
+    });
 });

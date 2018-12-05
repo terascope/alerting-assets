@@ -1,14 +1,21 @@
 
-import { TransformConfig } from '../../interfaces'
+import OperationBase from '../base';
+import { DataEntity } from '@terascope/job-components';
+import { OperationConfig } from '../../../../interfaces'
 import _ from 'lodash';
 
-export default function geolocation(config: TransformConfig) {
-    const { target_field: field } = config;
-    const newSource = field.lastIndexOf('.') === -1 ?
-        field : field.slice(0, field.lastIndexOf('.'))
-        //TODO: should we support geohashes and geo arrays here?
-    return (data: object) => {
-        const geoData = _.get(data, newSource);
+export default class Geolocation implements OperationBase {
+    private source: string
+
+    constructor(config: OperationConfig) {
+        const field = config.target_field as string;
+        this.source = field.lastIndexOf('.') === -1 ?
+            field : field.slice(0, field.lastIndexOf('.'))
+    }
+
+    run(data: DataEntity): DataEntity | null {
+        const { source } = this;
+        const geoData = _.get(data, source);
         let hasError = false;
         if (!geoData) return data;
 
@@ -26,7 +33,7 @@ export default function geolocation(config: TransformConfig) {
             if (!lon || (lon > 180 || lon < -180)) hasError = true;
         }
 
-        if (hasError) _.unset(data, newSource);
+        if (hasError) _.unset(data, source);
         return data;
     }
 }

@@ -1,21 +1,21 @@
 
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from './interfaces';
-import WatcherManager from './lib/watch_manager';
+import PhaseManager from './lib/phase_manager';
 
 export default class Watcher extends BatchProcessor<WatcherConfig> {
-    private watchManager: WatcherManager;
+    private operationsManager: PhaseManager;
 
     constructor(context: WorkerContext, opConfig: WatcherConfig, executionConfig: ExecutionConfig) {
         super(context, opConfig, executionConfig);
-        this.watchManager = new WatcherManager(opConfig, context.logger)
+        this.operationsManager = new PhaseManager(opConfig, context.logger)
     }
 
     async initialize() {
-        return this.watchManager.init()
+        return this.operationsManager.init()
     }
 
    async onBatch(data: DataEntity[]) {
-        return this.watchManager.run(data);
+        return this.operationsManager.run(data);
    }
 }

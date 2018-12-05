@@ -20,7 +20,7 @@ describe('matcher', () => {
         const opConfig = {
             _op: 'watcher',
             file_path: matchRules1Path,
-            selector_config: { _created: 'date' },
+            selector_config: { _created: 'date' }
         };
 
         const data = DataEntity.makeArray([
@@ -41,8 +41,7 @@ describe('matcher', () => {
         const opConfig = {
             _op: 'watcher',
             file_path: matchRules1Path,
-            selector_config: { _created: 'date' },
-            actions: [{ some: 'actions' }]
+            selector_config: { _created: 'date' }
         };
 
         const data = DataEntity.makeArray([
@@ -57,18 +56,14 @@ describe('matcher', () => {
         const results =  await test.run(data);
 
         expect(results.length).toEqual(3)
-        results.forEach((doc) => {
-            expect(doc.getMetadata('actions')).toEqual(opConfig.actions);
-            expect(doc.getMetadata('selector')).toBeDefined();
-        })
+        results.forEach(doc => expect(doc.getMetadata('selectors')).toBeDefined());
     });
 
     it('it can match multiple rules', async () => {
         const opConfig = {
             _op: 'watcher',
             file_path: matchRules1Path,
-            selector_config: { _created: 'date' },
-            actions: [{ some: 'actions' }]
+            selector_config: { _created: 'date' }
         }
 
         const data = DataEntity.makeArray([
@@ -77,11 +72,15 @@ describe('matcher', () => {
             { some: 'other', bytes: 1200 }
         ]);
 
+        const rules = {
+            'some:data AND bytes:>=1000': true,
+            'other:/.*abc.*/ OR _created:>=2018-11-16T15:16:09.076Z': true
+        };
+
         const test = await opTest.init({ opConfig });
         const results =  await test.run(data);
         // each match will be inserted into the results
-        expect(results.length).toEqual(2);
-        expect(results[0].getMetadata('selector')).toEqual('some:data AND bytes:>=1000');
-        expect(results[1].getMetadata('selector')).toEqual('other:/.*abc.*/ OR _created:>=2018-11-16T15:16:09.076Z');
+        expect(results.length).toEqual(1);
+        expect(results[0].getMetadata('selectors')).toEqual(rules);
     });
 })
