@@ -3,7 +3,7 @@ const path = require('path');
 const LoaderModule = require('../asset/src/transform/lib/loader');
 const Loader = LoaderModule.default || LoaderModule;
 
-describe('Loader', () => {
+xdescribe('Loader', () => {
     const matchRules1Path = path.join(__dirname, './fixtures/matchRules1.txt');
     const transformRules2Path = path.join(__dirname, './fixtures/transformRules2.txt');
 

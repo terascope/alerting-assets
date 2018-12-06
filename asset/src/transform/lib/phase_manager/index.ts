@@ -1,10 +1,7 @@
 
 import { DataEntity, Logger} from '@terascope/job-components';
-//import Matcher from './match';
-import { WatcherConfig,  /*Notifier, MatcherConfig, TransformConfig, NotifyType*/ } from '../../interfaces';
-//import Transform from './transform';
-//import PostProcessManager from '../post_process_manager';
 import _ from 'lodash';
+import { WatcherConfig } from '../../interfaces';
 import Loader from '../loader';
 import SelectionPhase from './selector_phase';
 import TransformPhase from './transform_phase';
@@ -24,7 +21,6 @@ export default class PhaseManager {
         this.sequence = [];
     }
 
-
     public async init () {
         const { opConfig } = this;
         try {
@@ -36,18 +32,18 @@ export default class PhaseManager {
             ];
         } 
         catch(err) {
-            this.logger.error(`could not instantiate phase manager: ${err.message}`)
+            console.log('the error', err)
+            const errMsg = `could not instantiate phase manager: ${err.message}`;
+            this.logger.error(errMsg);
+            throw new Error(errMsg)
         }
     }
 
     public run(data: DataEntity[]): DataEntity[] {
-        //const { opConfig, isMatcher, watcherList, postProcessManager } = this;
         const { sequence }  = this;
-       
-        return sequence.reduce<DataEntity[]>((data, phase:PhaseBase ) => {
-            return phase.run(data);
+        return sequence.reduce<DataEntity[]>((data, phase:PhaseBase) => {
+            console.log('data between phases', data)
+            return phase.run(data) 
         }, data)
-        //@ts-ignore
-        return results;
     }
 }

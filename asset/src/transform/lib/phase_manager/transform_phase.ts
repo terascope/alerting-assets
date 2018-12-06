@@ -15,7 +15,6 @@ export default class TransformPhase implements PhaseBase {
         const transformPhase: OperationsDictionary = {};
 
         _.forEach(configList, (config: OperationConfig) => {
-            //@ts-ignore
             if (!config.refs && (config.source_field && config.target_field)) {
                 if (!transformPhase[config.selector]) transformPhase[config.selector] = [];
                 transformPhase[config.selector].push(new Ops.Transform(config))
@@ -25,27 +24,30 @@ export default class TransformPhase implements PhaseBase {
         this.hasTransforms = Object.keys(transformPhase).length > 0;
     }
 
-    run(dataArray: DataEntity[]) {
+    run(dataArray: DataEntity[]): DataEntity[]{
         const { transformPhase, hasTransforms } = this;
-        if(!hasTransforms) return dataArray;
+        console.log('any incoming data at all for transform phase', dataArray)
+        if (!hasTransforms) return dataArray;
 
         const resultsList: DataEntity[] = [];
         _.each(dataArray, (record) => {
             const selectors = record.getMetadata('selectors');
             let results = {};
+            console.log('what are the selectors', selectors)
             _.forOwn(selectors, (_value, key) => {
                 if (transformPhase[key]) {
-                    transformPhase[key].forEach((fn) => {
-                       _.merge(results, fn.run(record));
-                    });
+                    transformPhase[key].forEach(fn => _.merge(results, fn.run(record)));
                 }
             });
+
             if (Object.keys(results).length > 0) {
                 const newRecord = new DataEntity(results, { selectors });
                 resultsList.push(newRecord);
+            } else {
+                console.log('im bypassing', record)
             }
         });
-
+        console.log('what extraction list', resultsList)
         return resultsList;
     }
 }

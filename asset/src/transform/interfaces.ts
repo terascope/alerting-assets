@@ -1,16 +1,11 @@
 
 import { DataEntity, OpConfig } from '@terascope/job-components';
-import PhaseBase from './lib/operations/base';
+import PhaseBase from './lib/operations/lib/base';
 export enum NotifyType { matcher = "matcher", extraction = "extraction" }
 
 export interface TypeOutput {
     selector: string,
     data: DataEntity | object
-}
-
-export interface SelectionResults {
-    isSelected: boolean;
-    selectors:  { [key: string]: boolean}
 }
 
 export interface MatcherConfig {
@@ -44,6 +39,22 @@ export interface OperationConfig {
     decoder?: string;
     refs?: string;
     post_process?: string
+}
+
+export interface Refs {
+    refs: string;
+    validation?: string;
+    post_process?: string;
+}
+
+export interface StringRefs extends Refs {
+    length?: number;
+    target_field: string;
+}
+
+export interface NormalizedConfig {
+    originalSelector: string;
+    configuration: OperationConfig
 }
 
 export interface ChainedPostProcess {

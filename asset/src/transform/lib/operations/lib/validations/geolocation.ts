@@ -9,11 +9,13 @@ export default class Geolocation implements OperationBase {
 
     constructor(config: OperationConfig) {
         const field = config.target_field as string;
+        if (!field) throw new Error(`could not find target_field for geolocation validation, config: ${JSON.stringify(config)}`)
         this.source = field.lastIndexOf('.') === -1 ?
             field : field.slice(0, field.lastIndexOf('.'))
     }
 
-    run(data: DataEntity): DataEntity | null {
+    run(data: DataEntity | null): DataEntity | null {
+        if (!data) return data;
         const { source } = this;
         const geoData = _.get(data, source);
         let hasError = false;

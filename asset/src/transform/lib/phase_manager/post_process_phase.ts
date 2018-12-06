@@ -1,6 +1,6 @@
 
 import { DataEntity } from '@terascope/job-components';
-import { OperationConfig, WatcherConfig, OperationsDictionary } from '../../interfaces';
+import { OperationConfig, WatcherConfig, OperationsDictionary, NormalizedConfig } from '../../interfaces';
 import PhaseBase from './base';
 import _ from 'lodash';
 import * as Operations from '../operations'
@@ -17,9 +17,9 @@ export default class PostProcessPhase implements PhaseBase {
 
         _.forEach(configList, (config: OperationConfig) => {
             //post_process first
-            if (config.selector && config.post_process) {
+            if (config.selector && config.post_process && !config.refs) {
                 const Op = Operations.opNames[config.post_process];
-                if (!Op) throw new Error(`could not find post_process module ${config.post_process}`);
+                if (!Op) throw new Error(`could not find post_process module config: ${JSON.stringify(config)}`);
                 if (!postProcessPhase[config.selector]) postProcessPhase[config.selector] = [];
                 postProcessPhase[config.selector].push(new Op(config))
             }
@@ -27,40 +27,73 @@ export default class PostProcessPhase implements PhaseBase {
 
         _.forEach(configList, (config: OperationConfig) => {
             // then do validations
-            if (config.selector && config.validation) {
+            if (config.selector && config.validation && !config.refs) {
                 const Op = Operations.opNames[config.validation];
+                if (!Op) throw new Error(`could not find validation module ${JSON.stringify(config)}`);
                 if (!postProcessPhase[config.selector]) postProcessPhase[config.selector] = [];
                 postProcessPhase[config.selector].push(new Op(config))
             }
         });
 
-        // _.forEach(configList, (config: OperationConfig) => {          
-        //     // convert refs to selectors
-        //     if (config.selector && config.post_process) {
-        //         if (!postProcessPhase[config.selector]) postProcessPhase[config.selector] = [];
-        //         postProcessPhase[config.selector].push(new Operations.Transform(config))
-        //     }
-        // });
+        _.forEach(configList, (config: OperationConfig) => {          
+            // convert refs to selectors
+            if (config.refs) {
+                const configData = this.normalizeConfig(config, configList)
+                const opType = config.validation || config.post_process;
+                const Op = Operations.opNames[opType as string];
+                if (!Op) throw new Error(`could not find ${opType} module, config: ${JSON.stringify(config)}`);
+
+                if (!postProcessPhase[configData.originalSelector]) postProcessPhase[configData.originalSelector] = [];
+                postProcessPhase[configData.originalSelector].push(new Op(configData.configuration));
+            }
+        });
         this.postProcessPhase = postProcessPhase;
         this.hasPostProcessing = Object.keys(postProcessPhase).length > 0;
     }
 
-    run(dataArray: DataEntity[]) {
+    normalizeConfig(config: OperationConfig, configList:OperationConfig[]): NormalizedConfig {
+        let originalSelector: string;
+        let targetConfig: OperationConfig
+
+        function findConfiguration(myConfig: OperationConfig) {
+            if (myConfig.refs) {
+                const id = myConfig.refs;
+                const referenceConfig = configList.find(obj => obj.id === id);
+                if (!referenceConfig) throw new Error(`could not find configuration id for refs ${id}`);
+                if (!targetConfig) targetConfig = referenceConfig;
+                // recurse
+                if (referenceConfig.refs) {
+                    findConfiguration(referenceConfig);
+                } else {
+                    originalSelector = referenceConfig.selector;
+                }
+            } else {
+                originalSelector = myConfig.selector;
+            }
+        }
+
+        findConfiguration(config);
+        // @ts-ignore
+        if (!originalSelector || !targetConfig) throw new Error('could not find orignal selector and target configuration')
+        const finalConfig = _.assign({}, targetConfig, config);
+        return { originalSelector, configuration: finalConfig };
+    }
+
+    run(dataArray: DataEntity[]): DataEntity[] {
         const { postProcessPhase, hasPostProcessing } = this;
         if (!hasPostProcessing) return dataArray;
-
         const resultsList: DataEntity[] = [];
+
         _.each(dataArray, (record) => {
             const selectors = record.getMetadata('selectors');
-            //FIXME: not extracting, need to be in and out
-            let results = record;
+            let results: DataEntity | null = record;
+
             _.forOwn(selectors, (_value, key) => {
                 if (postProcessPhase[key]) {
-                    results = postProcessPhase[key].reduce<DataEntity>((record, fn) => fn.run(record), results);
+                    results = postProcessPhase[key].reduce<DataEntity | null>((record, fn) => fn.run(record), results);
                 }
             });
-            if (Object.keys(results).length > 0) {
-                //const newRecord = new DataEntity(results, { selectors });
+            if (results && Object.keys(results).length > 0) {
                 resultsList.push(results);
             }
         });

@@ -8,6 +8,10 @@ fdescribe('can transform matches', () => {
 
     const transformRules1Path = path.join(__dirname, './fixtures/transformRules1.txt');
     const transformRules2Path = path.join(__dirname, './fixtures/transformRules2.txt');
+    const transformRules3Path = path.join(__dirname, './fixtures/transformRules3.txt');
+    const transformRules4Path = path.join(__dirname, './fixtures/transformRules4.txt');
+    const transformRules5Path = path.join(__dirname, './fixtures/transformRules5.txt');
+    const transformRules6Path = path.join(__dirname, './fixtures/transformRules6.txt');
 
     let opTest;
 
@@ -17,17 +21,17 @@ fdescribe('can transform matches', () => {
 
     it('it can transform matching data', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules1Path,
             selector_config: { _created: 'date' } 
         };
 
         const data = DataEntity.makeArray([
             { some: 'data', bytes: 200, myfield: 'hello' },
-            // { some: 'data', bytes: 200 },
-            // { some: 'other', bytes: 1200 },
-            // { other: 'xabcd', myfield: 'hello' },
-            // { _created: "2018-12-16T15:16:09.076Z", myfield: 'hello' }
+            { some: 'data', bytes: 200 },
+            { some: 'other', bytes: 1200 },
+            { other: 'xabcd', myfield: 'hello' },
+            { _created: "2018-12-16T15:16:09.076Z", myfield: 'hello' }
         ]);
 
         const test = await opTest.init({ opConfig });
@@ -43,7 +47,7 @@ fdescribe('can transform matches', () => {
 
     it('can uses typeConifg', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules1Path,
             selector_config: { location: 'geo' }
         };
@@ -60,9 +64,32 @@ fdescribe('can transform matches', () => {
         expect(results[0]).toEqual({ point: data[0].location });
     });
 
+    it('it can transform matching data with no selector', async () => {
+        const opConfig = {
+            _op: 'transform',
+            file_path: transformRules3Path
+        };
+
+        const data = DataEntity.makeArray([
+           { data: 'someData' },
+           { data: 'otherData' },
+           {}
+        ]);
+        const resultSet = data.map(obj => obj.data)
+        const test = await opTest.init({ opConfig });
+        const results =  await test.run(data);
+
+        expect(results.length).toEqual(2);
+        _.each(results, (data, index) => {
+            expect(DataEntity.isDataEntity(data)).toEqual(true);
+            expect(data.other).toEqual(resultSet[index]);
+            expect(data.getMetadata('selectors')['*']).toBeDefined();
+        });
+    });
+
     it('can work with regex transform queries', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules1Path
         };
 
@@ -83,7 +110,7 @@ fdescribe('can transform matches', () => {
 
     it('can extract using start/end', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules1Path
         };
 
@@ -109,7 +136,7 @@ fdescribe('can transform matches', () => {
 
     it('can merge extacted results', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules1Path
         };
 
@@ -128,7 +155,7 @@ fdescribe('can transform matches', () => {
 
     it('can use post process operations', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules2Path
         };
 
@@ -145,7 +172,7 @@ fdescribe('can transform matches', () => {
 
     it('false validations remove the fields', async () => {
         const opConfig = {
-            _op: 'watcher',
+            _op: 'transform',
             file_path: transformRules2Path
         };
 
@@ -167,5 +194,75 @@ fdescribe('can transform matches', () => {
 
         const results2 =  await test.run(data2);
         expect(results2).toEqual([]);
+    });
+
+    it('refs can target the right field', async () => {
+        const opConfig = {
+            _op: 'transform',
+            file_path: transformRules4Path
+        };
+
+        const data = DataEntity.makeArray([
+            { hello: 'world', lat: 23.423, lon: 93.33, first: 'John', last: 'Doe' }, // all good
+            { hello: 'world', lat: 123.423, lon: 93.33, first: 'John', last: 'Doe' }, // bad geo
+            { hello: 'world', lat: 123.423, lon: 93.33, first: 'John', last: 'Doe' }, // bad geo
+            { hello: 'world', lat: 23.423, lon: 93.33, full_name: 3243423 } // full_name is not string
+        ]);
+
+        const resultSet = [
+            { location: { lat: 23.423, lon: 93.33 }, first_name: 'John', last_name: 'Doe', full_name: 'John Doe' },
+            { first_name: 'John', last_name: 'Doe', full_name: 'John Doe' },
+            { first_name: 'John', last_name: 'Doe', full_name: 'John Doe' },
+            { location: { lat: 23.423, lon: 93.33 } } 
+        ];
+
+        const test = await opTest.init({ opConfig });
+        const results =  await test.run(data);
+
+        _.each(results, (data, index) => {
+            expect(DataEntity.isDataEntity(data)).toEqual(true);
+            expect(data).toEqual(resultSet[index]);
+            expect(data.getMetadata('selectors')).toBeDefined();
+        });
+    });
+
+    it('can chain selection => transform => selection', async() => {
+        const opConfig = {
+            _op: 'transform',
+            file_path: transformRules5Path
+        };
+
+        const data = DataEntity.makeArray([
+            { hello: 'world',  first: 'John', last: 'Doe' },
+            { hello: 'world',  first: 'Jane', last: 'Austin' },
+            { hello: 'world',  first: 'Jane', last: 'Doe' },
+            { hello: 'world' }
+        ]);
+
+        const test = await opTest.init({ opConfig });
+        const results =  await test.run(data);
+
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({ first_name: 'Jane', last_name: 'Doe', full_name: 'Jane Doe' });
+
+        const metaData = results[0].getMetadata();
+        expect(metaData.selectors).toEqual({ 'hello:world': true, 'full_name:"Jane Doe"': true });
+    });
+
+    xit('can chain selection => transform => selection => transform', async() => {
+        const opConfig = {
+            _op: 'transform',
+            file_path: transformRules6Path
+        };
+
+        const data = DataEntity.makeArray([
+            { hello: 'world',  first: 'John', last: 'Doe' },
+            { hello: 'world',  first: 'Jane', last: 'Austin' },
+            { hello: 'world',  first: 'Jane', last: 'Doe' },
+            { hello: 'world' }
+        ]);
+
+        const test = await opTest.init({ opConfig });
+        const results =  await test.run(data);
     });
 });

@@ -11,17 +11,20 @@ export default class Join implements OperationBase{
         this.config = config;
     }
     
-    run(doc: DataEntity): DataEntity | null {
+    run(doc: DataEntity | null): DataEntity | null {
+        console.log('running top level join', doc)
+        if (!doc) return doc;
         const { config } = this;
         const delimiter = config.delimiter !== undefined ? config.delimiter : '';
         const fields = config.fields.map(field => _.get(doc, field));
         const results = fields.join(delimiter);
         if (config.remove_source) {
             const final = {}
-            final[config.target_field] = results;
+            if (results.length !== delimiter.length) final[config.target_field] = results;
             return new DataEntity(final, doc.getMetadata())
         }
-        doc[config.target_field] = results;
+        if (results.length !== delimiter.length) doc[config.target_field] = results;
+        console.log('what is join returning', doc)
         return doc;
     }
 }

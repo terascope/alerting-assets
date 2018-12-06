@@ -1,7 +1,7 @@
 
 
 import { DataEntity } from '@terascope/job-components';
-import { OperationConfig, WatcherConfig, SelectionResults } from '../../interfaces';
+import { OperationConfig, WatcherConfig } from '../../interfaces';
 import PhaseBase from './base';
 import * as Ops from '../operations';
 import _ from 'lodash';
@@ -15,9 +15,9 @@ export default class SelectionPhase implements PhaseBase {
         const selectionPhase: Ops.Selector[] = [];
         const dict = {};
         _.forEach(configList, (config: OperationConfig) => {
-            if (config.selector) dict[config.selector] = true
+            if (config.selector && !config.refs) dict[config.selector] = config
         });
-        _.forOwn(dict, (_value, selector) => selectionPhase.push(new Ops.Selector(selector, this.opConfig.selector_config)))
+        _.forOwn(dict, (config, _selector) => selectionPhase.push(new Ops.Selector(config, this.opConfig.selector_config)))
         this.selectionPhase = selectionPhase;
     }
 
@@ -26,24 +26,15 @@ export default class SelectionPhase implements PhaseBase {
 
         if (selectionPhase.length > 0) {
             return data.reduce<DataEntity[]>((results, record) => {
-                const recordList = selectionPhase.reduce<SelectionResults>((meta, selectorOp) => {
-                    if (selectorOp.run(record)) {
-                        meta.isSelected  = true;
-                        meta.selectors[selectorOp.selector as string] = true;
-                    }
-                    return meta;
-                }, { selectors: {}, isSelected: false });
-                
-                if (recordList.isSelected) {
-                    //FIXME:temp hack
-                    const otherRecord = Object.assign({}, record)
-                    const match = new DataEntity(otherRecord, { selectors: recordList.selectors }); 
-                    results.push(match);
+                _.each(selectionPhase, selectorOp => selectorOp.run(record))
+                const recordMeta = record.getMetadata('selectors');
+                if (recordMeta) {
+                   results.push(record);
                 }
-                
                 return results;
             }, []);
         }
+
         return [];
     }
 }
