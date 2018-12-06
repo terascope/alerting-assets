@@ -17,14 +17,12 @@ export default class Loader {
         return this.fileLoader();
     }
 
-
     // private async esLoader() {
     //     //TODO: implement me
     // }
 
     private parseConfig(config: string): OperationConfig {
         if (this.isMatcher) {
-            //TODO: check to see if anything else needs to return from here
             return { selector: config as string };
         }
         const results =  JSON.parse(config);
@@ -37,7 +35,6 @@ export default class Loader {
         let { parseConfig } = this;
 
         parseConfig = parseConfig.bind(this);
-        // TODO: need better type definitions here
         const results: OperationConfig[] = [];
         
         const rl = readline.createInterface({
