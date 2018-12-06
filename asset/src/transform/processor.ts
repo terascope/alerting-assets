@@ -15,7 +15,7 @@ export default class Watcher extends BatchProcessor<WatcherConfig> {
         return this.operationsManager.init()
     }
 
-   async onBatch(data: DataEntity[]) {
+    async onBatch(data: DataEntity[]) {
         return this.operationsManager.run(data);
-   }
+    } 
 }

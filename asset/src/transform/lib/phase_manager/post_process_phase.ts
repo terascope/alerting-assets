@@ -14,7 +14,7 @@ export default class PostProcessPhase implements PhaseBase {
     constructor(opConfig: WatcherConfig, configList:OperationConfig[]) {
         this.opConfig = opConfig;
         const postProcessPhase: OperationsDictionary = {};
-
+        //TODO: look to refactor this
         _.forEach(configList, (config: OperationConfig) => {
             //post_process first
             if (config.selector && config.post_process && !config.refs) {
