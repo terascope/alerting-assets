@@ -47,8 +47,10 @@ export default class Loader {
         //TODO: error handling here
           return new Promise<OperationConfig[]>((resolve) => {
             rl.on('line', (str) => {
-                const isComment = str[0] === '#';
-                if (!isComment) results.push(parseConfig(str))
+                if (str) {
+                    const isComment = str[0] === '#';
+                    if (!isComment) results.push(parseConfig(str))
+                }
             });
               
             rl.on('close', () => resolve(results));
