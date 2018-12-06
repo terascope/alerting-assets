@@ -32,7 +32,6 @@ export default class PhaseManager {
             ];
         } 
         catch(err) {
-            console.log('the error', err)
             const errMsg = `could not instantiate phase manager: ${err.message}`;
             this.logger.error(errMsg);
             throw new Error(errMsg)
@@ -42,7 +41,6 @@ export default class PhaseManager {
     public run(data: DataEntity[]): DataEntity[] {
         const { sequence }  = this;
         return sequence.reduce<DataEntity[]>((data, phase:PhaseBase) => {
-            console.log('data between phases', data)
             return phase.run(data) 
         }, data)
     }

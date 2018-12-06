@@ -26,14 +26,12 @@ export default class TransformPhase implements PhaseBase {
 
     run(dataArray: DataEntity[]): DataEntity[]{
         const { transformPhase, hasTransforms } = this;
-        console.log('any incoming data at all for transform phase', dataArray)
         if (!hasTransforms) return dataArray;
 
         const resultsList: DataEntity[] = [];
         _.each(dataArray, (record) => {
             const selectors = record.getMetadata('selectors');
             let results = {};
-            console.log('what are the selectors', selectors)
             _.forOwn(selectors, (_value, key) => {
                 if (transformPhase[key]) {
                     transformPhase[key].forEach(fn => _.merge(results, fn.run(record)));
@@ -43,11 +41,9 @@ export default class TransformPhase implements PhaseBase {
             if (Object.keys(results).length > 0) {
                 const newRecord = new DataEntity(results, { selectors });
                 resultsList.push(newRecord);
-            } else {
-                console.log('im bypassing', record)
             }
         });
-        console.log('what extraction list', resultsList)
+
         return resultsList;
     }
 }

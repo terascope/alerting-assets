@@ -4,7 +4,7 @@ const path = require('path');
 const Transform = require('../asset/src/transform');
 const _ = require('lodash');
 
-fdescribe('can transform matches', () => {
+describe('can transform matches', () => {
 
     const transformRules1Path = path.join(__dirname, './fixtures/transformRules1.txt');
     const transformRules2Path = path.join(__dirname, './fixtures/transformRules2.txt');
@@ -249,7 +249,7 @@ fdescribe('can transform matches', () => {
         expect(metaData.selectors).toEqual({ 'hello:world': true, 'full_name:"Jane Doe"': true });
     });
 
-    xit('can chain selection => transform => selection => transform', async() => {
+    it('can chain selection => transform => selection => transform', async() => {
         const opConfig = {
             _op: 'transform',
             file_path: transformRules6Path
@@ -264,5 +264,11 @@ fdescribe('can transform matches', () => {
 
         const test = await opTest.init({ opConfig });
         const results =  await test.run(data);
+
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({ name: 'Jane Doe' });
+
+        const metaData = results[0].getMetadata();
+        expect(metaData.selectors).toEqual({ 'hello:world': true, 'full_name:"Jane Doe"': true });
     });
 });

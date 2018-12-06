@@ -94,6 +94,8 @@ export default class PostProcessPhase implements PhaseBase {
                 }
             });
             if (results && Object.keys(results).length > 0) {
+                const secondarySelectors = results.getMetadata('selectors');
+                results.setMetadata('selectors', _.assign(selectors, secondarySelectors))
                 resultsList.push(results);
             }
         });

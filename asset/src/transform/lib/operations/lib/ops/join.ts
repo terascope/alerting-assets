@@ -12,7 +12,6 @@ export default class Join implements OperationBase{
     }
     
     run(doc: DataEntity | null): DataEntity | null {
-        console.log('running top level join', doc)
         if (!doc) return doc;
         const { config } = this;
         const delimiter = config.delimiter !== undefined ? config.delimiter : '';
@@ -24,7 +23,7 @@ export default class Join implements OperationBase{
             return new DataEntity(final, doc.getMetadata())
         }
         if (results.length !== delimiter.length) doc[config.target_field] = results;
-        console.log('what is join returning', doc)
+
         return doc;
     }
 }
