@@ -5,12 +5,13 @@ import { DataEntity } from '@terascope/job-components';
 import OperationBase from '../base';
 import { OperationConfig } from '../../../../interfaces';
 
-export default class Selector implements OperationBase {
+export default class Selector extends OperationBase {
     private documentMatcher: DocumentMatcher;
     public selector: string;
     private isMatchAll: boolean;
 
     constructor(config: OperationConfig, typeConfigs?: object) {
+        super();
         let luceneQuery = config.selector;
         this.selector = luceneQuery;
         this.isMatchAll = luceneQuery === '*';

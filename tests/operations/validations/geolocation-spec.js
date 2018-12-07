@@ -2,7 +2,7 @@
 const { Geolocation } = require('../../../asset/src/transform/lib/operations');
 const { DataEntity } = require ('@terascope/job-components');
 
-describe('geolocation validation', () => {
+xdescribe('geolocation validation', () => {
    
     it('can instantiate', () => {
         const opConfig = { target_field: 'someField' };

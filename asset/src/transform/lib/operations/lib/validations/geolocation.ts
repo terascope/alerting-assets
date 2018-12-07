@@ -4,27 +4,19 @@ import { DataEntity } from '@terascope/job-components';
 import { OperationConfig } from '../../../../interfaces'
 import _ from 'lodash';
 
-export default class Geolocation implements OperationBase {
-    private source: string
+export default class Geolocation extends OperationBase {
 
     constructor(config: OperationConfig) {
+        super();
         this.validate(config);
-        const field = config.target_field as string;
-        this.source = field.lastIndexOf('.') === -1 ?
-            field : field.slice(0, field.lastIndexOf('.'))
     }
 
-    private validate(config: OperationConfig) {
-        const { target_field: field } = config;
-        if (!field || typeof field !== 'string' || field.length === 0) throw new Error(`could not find target_field for geolocation validation or it is improperly formatted, config: ${JSON.stringify(config)}`)
-    }
-
-    run(data: DataEntity | null): DataEntity | null {
-        if (!data) return data;
+    run(doc: DataEntity | null): DataEntity | null {
+        if (!doc) return doc;
         const { source } = this;
-        const geoData = _.get(data, source);
+        const geoData = _.get(doc, source);
         let hasError = true;
-        if (!geoData) return data;
+        if (!geoData) return doc;
 
         if (typeof geoData === 'string') {
             hasError = false;
@@ -42,7 +34,7 @@ export default class Geolocation implements OperationBase {
             if (!lon || (lon > 180 || lon < -180)) hasError = true;
         }
 
-        if (hasError) _.unset(data, source);
-        return data;
+        if (hasError) _.unset(doc, source);
+        return doc;
     }
 }

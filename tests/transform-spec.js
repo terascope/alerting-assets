@@ -4,7 +4,7 @@ const path = require('path');
 const Transform = require('../asset/src/transform');
 const _ = require('lodash');
 
-describe('can transform matches', () => {
+xdescribe('can transform matches', () => {
 
     const transformRules1Path = path.join(__dirname, './fixtures/transformRules1.txt');
     const transformRules2Path = path.join(__dirname, './fixtures/transformRules2.txt');

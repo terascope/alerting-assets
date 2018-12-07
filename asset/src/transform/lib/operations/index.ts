@@ -5,13 +5,23 @@ import Selector from './lib/ops/selector';
 import Transform  from './lib/ops/transform';
 import Geolocation from './lib/validations/geolocation';
 import String from './lib/validations/string';
+import Number from './lib/validations/number';
+import Boolean from './lib/validations/boolean';
+import Url from './lib/validations/url';
+import Email from './lib/validations/email';
+import Ip from './lib/validations/ip';
 
 const opNames = {
     join: Join,
     selector: Selector,
     transform: Transform,
     geolocation: Geolocation,
-    string: String
+    string: String,
+    boolean: Boolean,
+    number: Number,
+    url: Url,
+    email: Email,
+    ip: Ip
 };
 
 export {
@@ -21,5 +31,10 @@ export {
     Transform,
     Geolocation,
     String,
+    Number,
+    Boolean,
+    Url,
+    Email,
+    Ip,
     opNames
 };
