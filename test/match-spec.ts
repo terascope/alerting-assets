@@ -8,6 +8,7 @@ describe('matcher', () => {
     const testAssetPath = path.join(__dirname, './assets');
     const type = 'processor';
     let opTest: opTestHarness.TestHarness;
+    const assetName = 'someAssetId';
 
     beforeEach(() => {
         opTest = opTestHarness({ Processor, Schema });
@@ -17,12 +18,13 @@ describe('matcher', () => {
     it('can return matching documents', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: 'matchRules1.txt',
+            rules_file: 'matchRules1.txt',
+            asset_name: assetName,
             selector_config: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -43,12 +45,13 @@ describe('matcher', () => {
     it('it add metadata to returning docs', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: 'matchRules1.txt',
+            rules_file: 'matchRules1.txt',
+            asset_name: assetName,
             selector_config: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -71,12 +74,13 @@ describe('matcher', () => {
     it('it can match multiple rules', async () => {
         const opConfig = {
             _op: 'watcher',
-            file_path: 'matchRules1.txt',
+            rules_file: 'matchRules1.txt',
+            asset_name: assetName,
             selector_config: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 

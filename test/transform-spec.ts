@@ -9,6 +9,7 @@ describe('can transform matches', () => {
     const testAssetPath = path.join(__dirname, './assets');
     let opTest: opTestHarness.TestHarness;
     const type = 'processor';
+    const assetName = 'someAssetId';
 
     beforeEach(() => {
         opTest =  opTestHarness({ Processor, Schema });
@@ -18,12 +19,13 @@ describe('can transform matches', () => {
     it('it can transform matching data', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules1.txt',
+            rules_file: 'transformRules1.txt',
+            asset_name: assetName,
             selector_config: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -50,12 +52,13 @@ describe('can transform matches', () => {
     it('can uses typeConifg', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules1.txt',
+            rules_file: 'transformRules1.txt',
+            asset_name: assetName,
             selector_config: { location: 'geo' }
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -74,11 +77,12 @@ describe('can transform matches', () => {
     it('it can transform matching data with no selector', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules3.txt'
+            rules_file: 'transformRules3.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -103,11 +107,12 @@ describe('can transform matches', () => {
     it('can work with regex transform queries', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules1.txt'
+            rules_file: 'transformRules1.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -129,11 +134,12 @@ describe('can transform matches', () => {
     it('can extract using start/end', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules1.txt'
+            rules_file: 'transformRules1.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -160,11 +166,12 @@ describe('can transform matches', () => {
     it('can merge extacted results', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules1.txt'
+            rules_file: 'transformRules1.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -184,11 +191,12 @@ describe('can transform matches', () => {
     it('can use post process operations', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules2.txt'
+            rules_file: 'transformRules2.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -206,11 +214,12 @@ describe('can transform matches', () => {
     it('false validations remove the fields', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules2.txt'
+            rules_file: 'transformRules2.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -237,11 +246,12 @@ describe('can transform matches', () => {
     it('refs can target the right field', async () => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules4.txt'
+            rules_file: 'transformRules4.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -272,11 +282,12 @@ describe('can transform matches', () => {
     it('can chain selection => transform => selection', async() => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules5.txt'
+            rules_file: 'transformRules5.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
@@ -300,11 +311,12 @@ describe('can transform matches', () => {
     it('can chain selection => transform => selection => transform', async() => {
         const opConfig = {
             _op: 'transform',
-            file_path: 'transformRules6.txt'
+            rules_file: 'transformRules6.txt',
+            asset_name: assetName,
         };
 
         const executionConfig = newTestExecutionConfig({
-            assets: ['someAssetId'],
+            assets: [assetName],
             operations: [opConfig]
         });
 
