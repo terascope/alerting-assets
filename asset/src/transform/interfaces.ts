@@ -1,6 +1,6 @@
 
 import { OpConfig } from '@terascope/job-components';
-export enum NotifyType { matcher = "matcher", extraction = "extraction" }
+export enum NotifyType { matcher = 'matcher', extraction = 'extraction' }
 
 export interface WatcherConfig extends OpConfig {
     type: string;

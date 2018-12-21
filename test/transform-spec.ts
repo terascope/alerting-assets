@@ -8,6 +8,7 @@ import _ from 'lodash';
 describe('can transform matches', () => {
     const testAssetPath = path.join(__dirname, './assets');
     let opTest: opTestHarness.TestHarness;
+    const type = 'processor';
 
     beforeEach(() => {
         opTest =  opTestHarness({ Processor, Schema });
@@ -18,29 +19,30 @@ describe('can transform matches', () => {
         const opConfig = {
             _op: 'transform',
             file_path: 'transformRules1.txt',
-            selector_config: { _created: 'date'}
+            selector_config: { _created: 'date' }
         };
-        
-        const executionConfig = {
+
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
             { some: 'data', bytes: 200, myfield: 'hello' },
             { some: 'data', bytes: 200 },
             { some: 'other', bytes: 1200 },
             { other: 'xabcd', myfield: 'hello' },
-            { _created: "2018-12-16T15:16:09.076Z", myfield: 'hello' }
+            { _created: '2018-12-16T15:16:09.076Z', myfield: 'hello' }
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
-        _.each(results, (data) => {
+        // @ts-ignore
+        _.each(results, (data:DataEntity) => {
             expect(DataEntity.isDataEntity(data)).toEqual(true);
-            expect(_.get(data, "topfield.value1")).toEqual('hello');
+            expect(_.get(data, 'topfield.value1')).toEqual('hello');
             expect(data.getMetadata('selectors')).toBeDefined();
         });
     });
@@ -52,17 +54,17 @@ describe('can transform matches', () => {
             selector_config: { location: 'geo' }
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
-            { hostname: "www.other.com", location: '33.435967,  -111.867710 ' }, // true
-            { hostname: "www.example.com", location: '22.435967,-150.867710' }  // false
+            { hostname: 'www.other.com', location: '33.435967,  -111.867710 ' }, // true
+            { hostname: 'www.example.com', location: '22.435967,-150.867710' }  // false
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
@@ -75,22 +77,23 @@ describe('can transform matches', () => {
             file_path: 'transformRules3.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
            { data: 'someData' },
            { data: 'otherData' },
            {}
         ]);
-        const resultSet = data.map(obj => obj.data)
-        const test = await opTest.init({ executionConfig });
+        const resultSet = data.map(obj => obj.data);
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(2);
-        _.each(results, (data, index) => {
+        // @ts-ignore
+        _.each(results, (data:DataEntity, index) => {
             expect(DataEntity.isDataEntity(data)).toEqual(true);
             expect(data.other).toEqual(resultSet[index]);
             expect(data.getMetadata('selectors')['*']).toBeDefined();
@@ -103,10 +106,10 @@ describe('can transform matches', () => {
             file_path: 'transformRules1.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
             { some: 'data', someField: 'something' },
@@ -114,13 +117,13 @@ describe('can transform matches', () => {
             { some: 'data' },    // should not return anyting
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
-        // NOTE:   "regex": "some.*?$" will give you the entire matched string => wholeRegexResponse
-        // NOTE:   "regex": "some(.*?)$" will give you the captured part of the string => partRegexResponse
+        // NOTE:   'regex': 'some.*?$' will give you the entire matched string => wholeRegexResponse
+        // NOTE:   'regex': 'some(.*?)$' will give you the captured part of the string => partRegexResponse
 
-        expect(results.length).toEqual(1)
-        expect(results[0]).toEqual({ wholeRegexResponse: 'something', partRegexResponse: 'thing' })
+        expect(results.length).toEqual(1);
+        expect(results[0]).toEqual({ wholeRegexResponse: 'something', partRegexResponse: 'thing' });
     });
 
     it('can extract using start/end', async () => {
@@ -129,20 +132,20 @@ describe('can transform matches', () => {
             file_path: 'transformRules1.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data1 = DataEntity.makeArray([
-            { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere&other=things'},
+            { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere&other=things' },
         ]);
 
         const data2 = DataEntity.makeArray([
-                { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere'},
-            ]);
+                { some: 'data', bytes: 1200 , myfield: 'http://google.com?field1=helloThere' },
+        ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results1 =  await test.run(data1);
 
         expect(results1.length).toEqual(1);
@@ -160,22 +163,22 @@ describe('can transform matches', () => {
             file_path: 'transformRules1.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
-            { hostname: "www.example.com", pathLat: '/path/tiles/latitude/33.435967', pathLon: '/path/tiles/longitude/-111.867710' }, // true
-            { hostname: "www.other.com", location: '33.435967,  -111.867710 ' }, // false
-            { hostname: "www.example.com", location: '22.435967,-150.867710' }  // false
+            { hostname: 'www.example.com', pathLat: '/path/tiles/latitude/33.435967', pathLon: '/path/tiles/longitude/-111.867710' }, // true
+            { hostname: 'www.other.com', location: '33.435967,  -111.867710 ' }, // false
+            { hostname: 'www.example.com', location: '22.435967,-150.867710' }  // false
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
-        expect(results[0]).toEqual({ location: { lat: '33.435967', lon: '-111.867710' } })
+        expect(results[0]).toEqual({ location: { lat: '33.435967', lon: '-111.867710' } });
     });
 
     it('can use post process operations', async () => {
@@ -184,20 +187,20 @@ describe('can transform matches', () => {
             file_path: 'transformRules2.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
-            { hello: 'world', first: 'John', last: 'Doe'}
+            { hello: 'world', first: 'John', last: 'Doe' }
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
-        expect(results[0]).toEqual({ full_name: 'John Doe'})
+        expect(results[0]).toEqual({ full_name: 'John Doe' });
     });
 
     it('false validations remove the fields', async () => {
@@ -206,22 +209,22 @@ describe('can transform matches', () => {
             file_path: 'transformRules2.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
-            { geo: true, lat: '2233', other: 'data'},
-            { geo: true, lon: '2233'}
+            { geo: true, lat: '2233', other: 'data' },
+            { geo: true, lon: '2233' }
         ]);
 
         const data2 = DataEntity.makeArray([
-            { geo: true, lat: '2233'},
-            { geo: true, lon: '2233'}
+            { geo: true, lat: '2233' },
+            { geo: true, lon: '2233' }
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
@@ -237,10 +240,10 @@ describe('can transform matches', () => {
             file_path: 'transformRules4.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
             { hello: 'world', lat: 23.423, lon: 93.33, first: 'John', last: 'Doe' }, // all good
@@ -253,13 +256,13 @@ describe('can transform matches', () => {
             { location: { lat: 23.423, lon: 93.33 }, first_name: 'John', last_name: 'Doe', full_name: 'John Doe' },
             { first_name: 'John', last_name: 'Doe', full_name: 'John Doe' },
             { first_name: 'John', last_name: 'Doe', full_name: 'John Doe' },
-            { location: { lat: 23.423, lon: 93.33 } } 
+            { location: { lat: 23.423, lon: 93.33 } }
         ];
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
-
-        _.each(results, (data, index) => {
+        // @ts-ignore
+        _.each(results, (data:DataEntity, index) => {
             expect(DataEntity.isDataEntity(data)).toEqual(true);
             expect(data).toEqual(resultSet[index]);
             expect(data.getMetadata('selectors')).toBeDefined();
@@ -272,10 +275,10 @@ describe('can transform matches', () => {
             file_path: 'transformRules5.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
             { hello: 'world',  first: 'John', last: 'Doe' },
@@ -284,12 +287,12 @@ describe('can transform matches', () => {
             { hello: 'world' }
         ]);
 
-        const test = await opTest.init({ executionConfig });
-        const results =  await test.run(data);
+        const test = await opTest.init({ executionConfig, type });
+        const results = await test.run(data);
 
         expect(results.length).toEqual(1);
         expect(results[0]).toEqual({ first_name: 'Jane', last_name: 'Doe', full_name: 'Jane Doe' });
-
+        // @ts-ignore
         const metaData = results[0].getMetadata();
         expect(metaData.selectors).toEqual({ 'hello:world': true, 'full_name:"Jane Doe"': true });
     });
@@ -300,10 +303,10 @@ describe('can transform matches', () => {
             file_path: 'transformRules6.txt'
         };
 
-        const executionConfig = {
+        const executionConfig = newTestExecutionConfig({
             assets: ['someAssetId'],
-            operations: [ opConfig ]
-        };
+            operations: [opConfig]
+        });
 
         const data = DataEntity.makeArray([
             { hello: 'world',  first: 'John', last: 'Doe' },
@@ -312,12 +315,13 @@ describe('can transform matches', () => {
             { hello: 'world' }
         ]);
 
-        const test = await opTest.init({ executionConfig });
+        const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
         expect(results[0]).toEqual({ name: 'Jane Doe' });
 
+        // @ts-ignore
         const metaData = results[0].getMetadata();
         expect(metaData.selectors).toEqual({ 'hello:world': true, 'full_name:"Jane Doe"': true });
     });
