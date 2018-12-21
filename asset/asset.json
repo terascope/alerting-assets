@@ -1,0 +1,5 @@
+{
+  "name": "alerting",
+  "description": "alerting assets for matching and transforming data",
+  "version": "0.1.0"
+}
