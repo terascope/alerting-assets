@@ -12,7 +12,7 @@
     "@terascope/job-components": "^0.14.1",
     "@types/valid-url": "^1.0.2",
     "lodash": "^4.17.11",
-    "ts-transforms": "^0.5.0",
+    "ts-transforms": "^0.6.0",
     "valid-url": "^1.0.9",
     "xlucene-evaluator": "^0.2.1"
     

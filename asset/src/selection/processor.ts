@@ -1,8 +1,8 @@
 
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from  '../transform/interfaces';
-import { SelectionPhase, Loader } from 'ts-transforms';
-import path from 'path';
+import { SelectionPhase, Loader, OperationsManager } from 'ts-transforms';
+import loadResources from '../load_reasources';
 
 export default class Watcher extends BatchProcessor<WatcherConfig> {
     private phase!: SelectionPhase;
@@ -12,12 +12,12 @@ export default class Watcher extends BatchProcessor<WatcherConfig> {
     }
 
     async initialize() {
-        const assetPath = await this.context.apis.assets.getPath(this.opConfig.asset_name as string);
-        const filePath = path.join(assetPath, this.opConfig.rules_file as string);
-        const newOpConfig = Object.assign({}, this.opConfig, { file_path: filePath });
-        const loader = new Loader(newOpConfig);
+        const { getPath } = this.context.apis.assets;
+        const { opConfig, plugins } = await loadResources(this.opConfig, getPath);
+        const loader = new Loader(opConfig);
         const configList = await loader.load();
-        this.phase = new SelectionPhase(newOpConfig, configList);
+        const opsManager = new OperationsManager(plugins);
+        this.phase = new SelectionPhase(opConfig, configList, opsManager);
     }
 
     async onBatch(data: DataEntity[]) {
