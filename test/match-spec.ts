@@ -18,9 +18,8 @@ describe('matcher', () => {
     it('can return matching documents', async () => {
         const opConfig = {
             _op: 'watcher',
-            rules_file: 'matchRules1.txt',
-            asset_name: assetName,
-            selector_config: { _created: 'date' }
+            rules: [`${assetName}:transformRules1.txt`],
+            types: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -38,16 +37,14 @@ describe('matcher', () => {
 
         const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
-
-        expect(results.length).toEqual(3);
+        expect(results.length).toEqual(4);
     });
 
     it('it add metadata to returning docs', async () => {
         const opConfig = {
             _op: 'watcher',
-            rules_file: 'matchRules1.txt',
-            asset_name: assetName,
-            selector_config: { _created: 'date' }
+            rules: [`${assetName}:transformRules1.txt`],
+            types: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -66,7 +63,7 @@ describe('matcher', () => {
         const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
-        expect(results.length).toEqual(3);
+        expect(results.length).toEqual(4);
         // @ts-ignore
         results.forEach((doc: DataEntity) => expect(doc.getMetadata('selectors')).toBeDefined());
     });
@@ -74,9 +71,8 @@ describe('matcher', () => {
     it('it can match multiple rules', async () => {
         const opConfig = {
             _op: 'watcher',
-            rules_file: 'matchRules1.txt',
-            asset_name: assetName,
-            selector_config: { _created: 'date' }
+            rules: [`${assetName}:transformRules1.txt`],
+            types: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -91,6 +87,7 @@ describe('matcher', () => {
         ]);
 
         const rules = {
+            'some:data': true,
             'some:data AND bytes:>=1000': true,
             'other:/.*abc.*/ OR _created:>=2018-11-16T15:16:09.076Z': true
         };
@@ -98,7 +95,7 @@ describe('matcher', () => {
         const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
         // each match will be inserted into the results
-        expect(results.length).toEqual(1);
+        expect(results.length).toEqual(2);
         // @ts-ignore
         expect(results[0].getMetadata('selectors')).toEqual(rules);
     });

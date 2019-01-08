@@ -19,9 +19,8 @@ describe('can transform matches', () => {
     it('it can transform matching data', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules1.txt',
-            asset_name: assetName,
-            selector_config: { _created: 'date' }
+            rules: [`${assetName}:transformRules1.txt`],
+            types: { _created: 'date' }
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -52,9 +51,8 @@ describe('can transform matches', () => {
     it('can uses typeConifg', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules1.txt',
-            asset_name: assetName,
-            selector_config: { location: 'geo' }
+            rules: [`${assetName}:transformRules1.txt`],
+            types: { location: 'geo' }
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -77,8 +75,7 @@ describe('can transform matches', () => {
     it('it can transform matching data with no selector', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules3.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules3.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -107,8 +104,7 @@ describe('can transform matches', () => {
     it('can work with regex transform queries', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules1.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules1.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -134,8 +130,7 @@ describe('can transform matches', () => {
     it('can extract using start/end', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules1.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules1.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -166,8 +161,7 @@ describe('can transform matches', () => {
     it('can merge extacted results', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules1.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules1.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -191,8 +185,7 @@ describe('can transform matches', () => {
     it('can use post process operations', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules2.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules2.txt`]
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -214,8 +207,7 @@ describe('can transform matches', () => {
     it('false validations remove the fields', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules2.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules2.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -246,8 +238,7 @@ describe('can transform matches', () => {
     it('refs can target the right field', async () => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules4.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules4.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -282,8 +273,7 @@ describe('can transform matches', () => {
     it('can chain selection => transform => selection', async() => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules5.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules5.txt`],
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -311,8 +301,8 @@ describe('can transform matches', () => {
     it('can chain selection => transform => selection => transform', async() => {
         const opConfig = {
             _op: 'transform',
-            rules_file: 'transformRules6.txt',
-            asset_name: assetName,
+            rules: [`${assetName}:transformRules6.txt`],
+
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -336,5 +326,41 @@ describe('can transform matches', () => {
         // @ts-ignore
         const metaData = results[0].getMetadata();
         expect(metaData.selectors).toEqual({ 'hello:world': true, 'full_name:"Jane Doe"': true });
+    });
+
+    it('can work with plugins', async() => {
+        const opConfig = {
+            _op: 'transform',
+            rules: [`${assetName}:transformRulesTag.txt`],
+            plugins: [`${assetName}:plugins`]
+        };
+
+        const executionConfig = newTestExecutionConfig({
+            assets: [assetName],
+            operations: [opConfig]
+        });
+
+        const key = '123456789';
+
+        const data = DataEntity.makeArray([
+            { host: 'example.com', field1: `http://www.example.com/path?field1=${key}&value2=moreblah&value3=evenmoreblah` },
+            { host: 'example.com' },
+            { host: 'example.com', field1: 'someRandomStr' },
+            { host: 'example.com', field1: ['someRandomStr', `http://www.example.com/path?field1=${key}&value2=moreblah&value3=evenmoreblah`] },
+            { size: 2 }
+        ]);
+
+        const test = await opTest.init({ executionConfig, type });
+        const results =  await test.run(data);
+
+        expect(results.length).toEqual(2);
+        expect(results[0]).toEqual({
+            field1: key,
+            wasTagged: true
+        });
+        expect(results[1]).toEqual({
+            field1: key,
+            wasTagged: true
+        });
     });
 });
