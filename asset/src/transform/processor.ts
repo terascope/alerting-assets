@@ -1,12 +1,12 @@
 
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from './interfaces';
-import { PhaseManager } from 'ts-transforms';
+import { Transform } from 'ts-transforms';
 import loadResources from '../load_reasources';
 import _ from 'lodash';
 
-export default class Watcher extends BatchProcessor<WatcherConfig> {
-    private phaseManager!: PhaseManager;
+export default class Transforms extends BatchProcessor<WatcherConfig> {
+    private transform!: Transform;
 
     constructor(context: WorkerContext, opConfig: WatcherConfig, executionConfig: ExecutionConfig) {
         super(context, opConfig, executionConfig);
@@ -15,11 +15,11 @@ export default class Watcher extends BatchProcessor<WatcherConfig> {
     async initialize() {
         const { getPath } = this.context.apis.assets;
         const { opConfig, plugins } = await loadResources(this.opConfig, getPath);
-        this.phaseManager = new PhaseManager(opConfig, this.logger);
-        return this.phaseManager.init(plugins);
+        this.transform = new Transform(opConfig, this.logger);
+        return this.transform.init(plugins);
     }
 
     async onBatch(data: DataEntity[]) {
-        return this.phaseManager.run(data);
+        return this.transform.run(data);
     }
 }

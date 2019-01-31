@@ -1,6 +1,6 @@
 
 import Processor from './processor';
-import Schema from '../transform/schema';
+import Schema from './schema';
 
 export {
     Processor,
