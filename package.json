@@ -5,10 +5,10 @@
     "scripts": {
         "lint": "tslint --project tsconfig.json --format verbose",
         "postinstall": "yarn --cwd ./asset install",
-        "lint:fix": "npm run lint -- --fix",
-        "prepare": "npm run build",
+        "lint:fix": "yarn run lint -- --fix",
+        "prepare": "yarn run build",
         "build": "rimraf asset/dist; tsc --project tsconfig.json --pretty",
-        "build:watch": "npm run build --watch",
+        "build:watch": "yarn run build --watch",
         "test": "jest",
         "test:watch": "jest --coverage=false --notify --watch --onlyChanged",
         "test:debug": "env DEBUG='*teraslice*' jest --detectOpenHandles --coverage=false --runInBand"
