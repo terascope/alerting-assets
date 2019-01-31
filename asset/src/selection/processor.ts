@@ -4,7 +4,7 @@ import { WatcherConfig } from  '../transform/interfaces';
 import { SelectionPhase, Loader, OperationsManager } from 'ts-transforms';
 import loadResources from '../load_reasources';
 
-export default class Watcher extends BatchProcessor<WatcherConfig> {
+export default class Selection extends BatchProcessor<WatcherConfig> {
     private phase!: SelectionPhase;
 
     constructor(context: WorkerContext, opConfig: WatcherConfig, executionConfig: ExecutionConfig) {

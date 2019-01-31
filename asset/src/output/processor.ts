@@ -1,11 +1,11 @@
 
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from  '../transform/interfaces';
-import { ValidationPhase, Loader, OperationsManager } from 'ts-transforms';
+import { OutputPhase, Loader, OperationsManager } from 'ts-transforms';
 import loadResources from '../load_reasources';
 
-export default class Validation extends BatchProcessor<WatcherConfig> {
-    private phase!: ValidationPhase;
+export default class Output extends BatchProcessor<WatcherConfig> {
+    private phase!: OutputPhase;
 
     constructor(context: WorkerContext, opConfig: WatcherConfig, executionConfig: ExecutionConfig) {
         super(context, opConfig, executionConfig);
@@ -17,7 +17,7 @@ export default class Validation extends BatchProcessor<WatcherConfig> {
         const loader = new Loader(opConfig);
         const configList = await loader.load();
         const opsManager = new OperationsManager(plugins);
-        this.phase = new ValidationPhase(opConfig, configList, opsManager);
+        this.phase = new OutputPhase(opConfig, configList, opsManager);
     }
 
     async onBatch(data: DataEntity[]) {

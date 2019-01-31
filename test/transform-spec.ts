@@ -201,7 +201,7 @@ describe('can transform matches', () => {
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
-        expect(results[0]).toEqual({ full_name: 'John Doe' });
+        expect(results[0]).toEqual({ first_name: 'John', last_name: 'Doe', full_name: 'John Doe' });
     });
 
     it('false validations remove the fields', async () => {
