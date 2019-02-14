@@ -14,13 +14,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@terascope/job-components@^0.14.1":
-  version "0.14.3"
-  resolved "https://registry.yarnpkg.com/@terascope/job-components/-/job-components-0.14.3.tgz#ae9c238ed1e7752427c9d07acab5baaa8962e5f1"
-  integrity sha512-LcFsia5U9ca/jpU8H6mmv78Xx6/ItjaNFra1Y4BjKGHSZ2Vst1mfI6e7vzdyrdat+VCcamrVo9r0bxanTNrNhA==
+"@terascope/job-components@^0.14.4":
+  version "0.14.4"
+  resolved "https://registry.yarnpkg.com/@terascope/job-components/-/job-components-0.14.4.tgz#5750457f5bf10cdbbc586d66cc80ab9b540e1a27"
+  integrity sha512-O8g+6P0N5UKagaaX6pT6vaUHbjv1yjgd3iziHL+5ThD6GtOO7N6XC12zLSBwe3hQ7gooN++554vCcRCCVn/pUA==
   dependencies:
     "@terascope/queue" "^1.1.6"
-    "@terascope/utils" "^0.1.0"
+    "@terascope/utils" "^0.3.0"
     convict "^4.4.1"
     datemath-parser "^1.0.6"
     uuid "^3.3.2"
@@ -30,20 +30,20 @@
   resolved "https://registry.yarnpkg.com/@terascope/queue/-/queue-1.1.6.tgz#763d035cf31d2e1fd819ae827274f50874016708"
   integrity sha512-TmLOLh49UVdksjwAUzOO6lqOQMwJIW0pHsXKibcdfzAcUgwXL3JH6BjO2l1u5njQeHjoj1SOyBk6aU1/fHd0PQ==
 
-"@terascope/utils@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.1.0.tgz#4b7977b6499cb7e0f021dddcb137232abcf9a7e6"
-  integrity sha512-QcK5Ry2OeyYwfijmBQtawI8G/bkcnlreQ2IA560uhyjHNtWi1WTLmNIeMzb0QHLRSN2sgdyMj2kdpUIhVwAShA==
+"@terascope/utils@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.3.0.tgz#ec04d57fd8f127fc3de478a8ddacd591911bedf2"
+  integrity sha512-OQZ8TKhIy/o0YWGhl69qGCUOJlrf7L8W6f58hl56Vj70kUExumyyjcjCKoiGNPmvL+aT4dq88OGZ7NTeEXludA==
   dependencies:
     debug "^4.1.1"
     is-plain-object "^2.0.4"
     kind-of "^6.0.2"
     lodash.clonedeep "^4.5.0"
 
-"@terascope/utils@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.2.0.tgz#5aec4e29e9567912e9759d778c6011aab276fcdf"
-  integrity sha512-5GR1WPX90p+9vCJs2D+p6M49Lcj8HOa/YH7CmnpZ43fnDxazP8IOAxWajKceXoG1ubn35OZfHZuDBQqNzzkK2g==
+"@terascope/utils@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.4.0.tgz#b66fac19ec725fa9e916626620cde78bb22333f8"
+  integrity sha512-PVYRlfmEeYUUHkfywft4hxmnY80wgU6r/dSxYZ413FnwFQNOjbEQCtBa2AjCgZKqjZ5wwGwP4H/LYoL+dj5jIA==
   dependencies:
     debug "^4.1.1"
     is-plain-object "^2.0.4"
@@ -1362,6 +1362,11 @@ d3-voronoi@1.1.2:
   resolved "https://registry.yarnpkg.com/d3-voronoi/-/d3-voronoi-1.1.2.tgz#1687667e8f13a2d158c80c1480c5a29cb0d8973c"
   integrity sha1-Fodmfo8TotFYyAwUgMWinLDYlzw=
 
+date-fns@^1.30.1:
+  version "1.30.1"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
+  integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
+
 datemath-parser@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/datemath-parser/-/datemath-parser-1.0.6.tgz#d527dabf8541b3da1b661d81c16c328f3b9a8dc5"
@@ -1941,19 +1946,19 @@ topojson-server@3.x:
   dependencies:
     commander "2"
 
-ts-transforms@^0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/ts-transforms/-/ts-transforms-0.11.0.tgz#130019c011d02aaf9bae59abd810adb10e34168a"
-  integrity sha512-EpopZB6n6BdlORm8FNjMXXyOlApzgoU8dyURNd3b06h1DyUGf4vHSKVk+0sZSNiPVe/w0AM2ThNm+PUFJBdIgA==
+ts-transforms@^0.16.2:
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/ts-transforms/-/ts-transforms-0.16.2.tgz#5f65b658f5987a3401df38f3b091736fd13249a8"
+  integrity sha512-CslqJPW3nsyV5PtstCRLtG8B9Zn8xwgh+QuVS/w6iDrjx46vTKSYoeiGhGOkWPxkAijlpZwFdFgMXJz+54+0Hw==
   dependencies:
-    "@terascope/utils" "^0.2.0"
+    "@terascope/utils" "^0.4.0"
     "@types/got" "^9.4.0"
     awesome-phonenumber "^2.3.3"
     got "^9.6.0"
     lodash "^4.17.11"
     valid-url "^1.0.9"
     validator "^10.10.0"
-    xlucene-evaluator "^0.3.0"
+    xlucene-evaluator "^0.4.0"
     yargs "^12.0.5"
 
 turf-jsts@*:
@@ -2023,12 +2028,13 @@ wrappy@1:
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
-xlucene-evaluator@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/xlucene-evaluator/-/xlucene-evaluator-0.3.0.tgz#09dc2d2e09af2e8fdc6b7a1344411e4669b9c909"
-  integrity sha512-rz5Ab8u0lzTHn3UzmL3WGJskRpnfmrQ7b5TxL25wsI2dWYOjoqX30MQut4oPMtmDIOJp69AeeS9PE82wH0VOQQ==
+xlucene-evaluator@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/xlucene-evaluator/-/xlucene-evaluator-0.4.0.tgz#2c19577527a370a17398b69e6f28ed5a514674a6"
+  integrity sha512-XUuVOb8JMeAoZ/Nw907eqFqz3b/rt/WSWuBvs/aJhv+hEa48Ye/NqZ0TO20rH/1gdPkx4QUXvl+LO9lRG03x6g==
   dependencies:
     "@turf/turf" "^5.1.6"
+    date-fns "^1.30.1"
     ip-num "^1.1.1"
     ip6addr "^0.2.2"
     is-cidr "^3.0.0"
