@@ -321,7 +321,7 @@ describe('can transform matches', () => {
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
-        expect(results[0]).toEqual({ name: 'Jane Doe' });
+        expect(results[0]).toEqual({ first_name: 'Jane', full_name: 'Jane Doe', last_name: 'Doe', name: 'Jane Doe' });
 
         // @ts-ignore
         const metaData = results[0].getMetadata();
