@@ -12,6 +12,7 @@ describe('extraction phase', () => {
     const assetName = 'someAssetId';
 
     beforeEach(() => {
+        // @ts-ignore
         opTest =  opTestHarness({ Processor, Schema });
         opTest.context.sysconfig.teraslice.assets_directory = testAssetPath;
     });
