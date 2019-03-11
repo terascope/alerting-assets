@@ -14,13 +14,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@terascope/job-components@^0.14.4":
-  version "0.14.4"
-  resolved "https://registry.yarnpkg.com/@terascope/job-components/-/job-components-0.14.4.tgz#5750457f5bf10cdbbc586d66cc80ab9b540e1a27"
-  integrity sha512-O8g+6P0N5UKagaaX6pT6vaUHbjv1yjgd3iziHL+5ThD6GtOO7N6XC12zLSBwe3hQ7gooN++554vCcRCCVn/pUA==
+"@terascope/job-components@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@terascope/job-components/-/job-components-0.15.0.tgz#9174470a13b65cb4be0afcb91bda346e717466ac"
+  integrity sha512-F9JJS781fsJoZWfGmuMDs9b8E04k4XZRSjqTnYsRIebc18w90Z8vV/++hALTpd/rusAYD32OMgSpe44ZTBQCVw==
   dependencies:
     "@terascope/queue" "^1.1.6"
-    "@terascope/utils" "^0.3.0"
+    "@terascope/utils" "^0.6.0"
     convict "^4.4.1"
     datemath-parser "^1.0.6"
     uuid "^3.3.2"
@@ -30,20 +30,20 @@
   resolved "https://registry.yarnpkg.com/@terascope/queue/-/queue-1.1.6.tgz#763d035cf31d2e1fd819ae827274f50874016708"
   integrity sha512-TmLOLh49UVdksjwAUzOO6lqOQMwJIW0pHsXKibcdfzAcUgwXL3JH6BjO2l1u5njQeHjoj1SOyBk6aU1/fHd0PQ==
 
-"@terascope/utils@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.3.0.tgz#ec04d57fd8f127fc3de478a8ddacd591911bedf2"
-  integrity sha512-OQZ8TKhIy/o0YWGhl69qGCUOJlrf7L8W6f58hl56Vj70kUExumyyjcjCKoiGNPmvL+aT4dq88OGZ7NTeEXludA==
+"@terascope/utils@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.4.0.tgz#b66fac19ec725fa9e916626620cde78bb22333f8"
+  integrity sha512-PVYRlfmEeYUUHkfywft4hxmnY80wgU6r/dSxYZ413FnwFQNOjbEQCtBa2AjCgZKqjZ5wwGwP4H/LYoL+dj5jIA==
   dependencies:
     debug "^4.1.1"
     is-plain-object "^2.0.4"
     kind-of "^6.0.2"
     lodash.clonedeep "^4.5.0"
 
-"@terascope/utils@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.4.0.tgz#b66fac19ec725fa9e916626620cde78bb22333f8"
-  integrity sha512-PVYRlfmEeYUUHkfywft4hxmnY80wgU6r/dSxYZ413FnwFQNOjbEQCtBa2AjCgZKqjZ5wwGwP4H/LYoL+dj5jIA==
+"@terascope/utils@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@terascope/utils/-/utils-0.6.0.tgz#72a226ef3f675b3b5b561b4a2d5491af6991af99"
+  integrity sha512-Aeztbtd6Rn6dQ6pfCfIFSAXRiO5N0lFmNvu6cTPyxsqtjyPMe8jv5Jgtz3Guh+PX6trktvMVNzQNhsTel9Nc4A==
   dependencies:
     debug "^4.1.1"
     is-plain-object "^2.0.4"

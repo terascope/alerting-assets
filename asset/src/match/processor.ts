@@ -2,7 +2,7 @@
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from '../transform/interfaces';
 import { Matcher } from 'ts-transforms';
-import loadResources from '../load_reasources';
+import loadResources from '../load_resources';
 import _ from 'lodash';
 
 export default class Match extends BatchProcessor<WatcherConfig> {

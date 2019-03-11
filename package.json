@@ -1,12 +1,12 @@
 {
     "name": "alerting-assets",
-    "version": "1.3.0",
+    "version": "0.4.0",
     "description": "Teraslice processors to enable alert generation from JSON document streams",
     "scripts": {
         "lint": "tslint --project tsconfig.json --format verbose",
-        "postinstall": "yarn --cwd ./asset install",
         "lint:fix": "yarn run lint -- --fix",
-        "prepare": "yarn run build",
+        "postinstall": "yarn --cwd ./asset install",
+        "asset:build": "yarn run build",
         "build": "rimraf asset/dist; tsc --project tsconfig.json --pretty",
         "build:watch": "yarn run build --watch",
         "test": "jest",
@@ -17,17 +17,17 @@
     "author": "Terascope, LLC <info@terascope.io>",
     "license": "MIT",
     "devDependencies": {
-        "@terascope/teraslice-op-test-harness": "^1.5.1",
-        "@types/jest": "^23.3.7",
-        "@types/lodash": "^4.14.119",
-        "@types/node": "^10.12.15",
-        "jest": "^23.6.0",
+        "@terascope/teraslice-op-test-harness": "^1.5.4",
+        "@types/jest": "^24.0.11",
+        "@types/lodash": "^4.14.122",
+        "@types/node": "^11.11.0",
+        "jest": "^24.4.0",
         "jest-extended": "^0.11.0",
         "rimraf": "^2.6.2",
-        "ts-jest": "^23.10.4",
-        "tslint": "^5.11.0",
+        "ts-jest": "^24.0.0",
+        "tslint": "^5.13.1",
         "tslint-config-airbnb": "^5.11.0",
-        "typescript": "^3.2.1"
+        "typescript": "^3.3.3333"
     },
     "engines": {
         "node": ">=8.0.0"

@@ -63,3 +63,7 @@ typings/
 
 # next.js build output
 .next
+
+# teraslice asset builds
+build/
+builds/
