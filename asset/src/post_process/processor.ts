@@ -14,10 +14,10 @@ export default class PostProcess extends BatchProcessor<WatcherConfig> {
     async initialize() {
         const { getPath } = this.context.apis.assets;
         const { opConfig, plugins } = await loadResources(this.opConfig, getPath);
-        const loader = new Loader(opConfig);
-        const configList = await loader.load();
+        const loader = new Loader(opConfig, this.logger);
         const opsManager = new OperationsManager(plugins);
-        this.phase = new PostProcessPhase(opConfig, configList, opsManager);
+        const { postProcessing } = await loader.load(opsManager);
+        this.phase = new PostProcessPhase(opConfig, postProcessing, opsManager);
     }
 
     async onBatch(data: DataEntity[]) {

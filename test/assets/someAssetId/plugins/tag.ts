@@ -2,8 +2,9 @@
 import { DataEntity } from '@terascope/job-components';
 
 export default class Tag {
-     // @ts-ignore
-    constructor(operationConfig) {
+    static cardinality = 'one-to-one';
+
+    constructor(operationConfig: any) {
         // @ts-ignore
         this.operationConfig = operationConfig;
     }
