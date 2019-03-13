@@ -179,8 +179,9 @@ describe('can transform matches', () => {
         const test = await opTest.init({ executionConfig, type });
         const results =  await test.run(data);
 
-        expect(results.length).toEqual(1);
+        expect(results.length).toEqual(2);
         expect(results[0]).toEqual({ location: { lat: '33.435967', lon: '-111.867710' } });
+        expect(results[1]).toEqual({ point: '33.435967,  -111.867710 ' });
     });
 
     it('can use post process operations', async () => {
@@ -202,7 +203,7 @@ describe('can transform matches', () => {
         const results =  await test.run(data);
 
         expect(results.length).toEqual(1);
-        expect(results[0]).toEqual({ first_name: 'John', last_name: 'Doe', full_name: 'John Doe' });
+        expect(results[0]).toEqual({ full_name: 'John Doe' });
     });
 
     it('false validations remove the fields', async () => {
@@ -360,7 +361,7 @@ describe('can transform matches', () => {
             wasTagged: true
         });
         expect(results[1]).toEqual({
-            field1: key,
+            field1: [key],
             wasTagged: true
         });
     });

@@ -11,6 +11,6 @@
     "dependencies": {
         "@terascope/job-components": "^0.15.0",
         "lodash": "^4.17.11",
-        "ts-transforms": "^0.16.2"
+        "ts-transforms": "^0.17.0"
     }
 }

@@ -14,10 +14,10 @@ export default class Output extends BatchProcessor<WatcherConfig> {
     async initialize() {
         const { getPath } = this.context.apis.assets;
         const { opConfig, plugins } = await loadResources(this.opConfig, getPath);
-        const loader = new Loader(opConfig);
-        const configList = await loader.load();
+        const loader = new Loader(opConfig, this.logger);
         const opsManager = new OperationsManager(plugins);
-        this.phase = new OutputPhase(opConfig, configList, opsManager);
+        const { output } = await loader.load(opsManager);
+        this.phase = new OutputPhase(opConfig, output, opsManager);
     }
 
     async onBatch(data: DataEntity[]) {
