@@ -1,6 +1,6 @@
 {
     "name": "alerting-assets",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Teraslice processors to enable alert generation from JSON document streams",
     "scripts": {
         "lint": "tslint --project tsconfig.json --format verbose",
