@@ -20,7 +20,8 @@ describe('extraction phase', () => {
     it('can run and post_process data', async () => {
         const opConfig = {
             _op: 'transform',
-            rules: [`${assetName}:transformRules2.txt`]
+            rules: [`${assetName}:transformRules.txt`],
+            plugins: ['someAssetId:plugins']
         };
 
         const executionConfig = newTestExecutionConfig({
@@ -29,15 +30,17 @@ describe('extraction phase', () => {
         });
 
         const data = [
-            new DataEntity({ first_name: 'John', last_name: 'Doe' }, { selectors: { 'hello:world': true } }),
-            new DataEntity({ first_name: 'Jane', last_name: 'Doe' }, { selectors: { 'other:key': true } }),
+            new DataEntity({ interm1: 'hello', interm2: 'world' }, { selectors: ['some:data'] }),
+            new DataEntity({ id: '1' }, { selectors: ['*'] }),
+            new DataEntity({}, { selectors: ['date:[2019-04-16T20:14:44.304Z TO *] AND bytes:>=1000000'] }),
         ];
 
         const test = await opTest.init({ executionConfig, type });
         const results = await test.run(data);
 
-        expect(results.length).toEqual(2);
-        expect(results[0]).toEqual({ first_name: 'John', last_name: 'Doe', full_name: 'John Doe' });
-        expect(results[1]).toEqual(data[1]);
+        expect(results.length).toEqual(3);
+        expect(results[0]).toEqual({ interm1: 'hello', interm2: 'world', final: 'hello world' });
+        expect(results[1]).toEqual({ id: 1 });
+        expect(results[2]).toEqual({ wasTagged: true });
     });
 });

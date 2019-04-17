@@ -5,7 +5,7 @@ import path from 'path';
 import { Processor, Schema } from '../asset/src/selection';
 import _ from 'lodash';
 
-describe('extraction phase', () => {
+describe('selection phase', () => {
     const testAssetPath = path.join(__dirname, './assets');
     let opTest: opTestHarness.TestHarness;
     const type = 'processor';
@@ -20,7 +20,8 @@ describe('extraction phase', () => {
     it('can run and select data', async () => {
         const opConfig = {
             _op: 'transform',
-            rules: [`${assetName}:transformRules1.txt`],
+            rules: [`${assetName}:transformRules.txt`],
+            plugins: ['someAssetId:plugins'],
             types: { location: 'geo' }
         };
 
@@ -39,10 +40,7 @@ describe('extraction phase', () => {
 
         const test = await opTest.init({ executionConfig, type });
         const results = await test.run(data);
-
-        expect(results.length).toEqual(3);
-        expect(results[0]).toEqual(data[0]);
-        expect(results[1]).toEqual(data[2]);
-        expect(results[2]).toEqual(data[3]);
+        // because of the * selector
+        expect(results.length).toEqual(5);
     });
 });

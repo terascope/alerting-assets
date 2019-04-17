@@ -1,6 +1,6 @@
 {
     "name": "asset",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "",
     "main": "index.js",
     "scripts": {
@@ -11,6 +11,6 @@
     "dependencies": {
         "@terascope/job-components": "^0.15.0",
         "lodash": "^4.17.11",
-        "ts-transforms": "^0.17.0"
+        "ts-transforms": "^0.20.0"
     }
 }

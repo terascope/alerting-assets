@@ -1,1 +1,0 @@
-{ "source_field": "data", "target_field": "other"}

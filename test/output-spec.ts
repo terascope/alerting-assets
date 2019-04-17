@@ -9,7 +9,6 @@ describe('extraction phase', () => {
     const testAssetPath = path.join(__dirname, './assets');
     let opTest: opTestHarness.TestHarness;
     const type = 'processor';
-    const assetName = 'someAssetId';
 
     beforeEach(() => {
         // @ts-ignore
@@ -20,24 +19,24 @@ describe('extraction phase', () => {
     it('can run and validate data', async () => {
         const opConfig = {
             _op: 'transform',
-            rules: [`${assetName}:transformRules16.txt`]
+            plugins: ['someAssetId:plugins'],
+            rules: ['someAssetId:transformRules.txt']
         };
-        const date = new Date().toISOString();
 
         const executionConfig = newTestExecutionConfig({
-            assets: [assetName],
+            assets: ['someAssetId'],
             operations: [opConfig]
         });
 
         const data = [
-            new DataEntity({ some: 'data', date }, { selectors: { 'fc2.com': true } }),
-            new DataEntity({ date }, { selectors: { 'fc2.com': true } }),
+            new DataEntity({ interm1: 'hello', interm2: 'world', final: 'hello world' }),
+            new DataEntity({ lastField: 'someValue' }),
         ];
 
         const test = await opTest.init({ executionConfig, type });
         const results = await test.run(data);
 
         expect(results.length).toEqual(1);
-        expect(results[0]).toEqual({ some: 'data', date });
+        expect(results[0]).toEqual({ final: 'hello world' });
     });
 });
