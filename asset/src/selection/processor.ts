@@ -2,7 +2,7 @@
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from  '../transform/interfaces';
 import { SelectionPhase, Loader, OperationsManager } from 'ts-transforms';
-import loadResources from '../load_resources';
+import { loadResources } from '../utils';
 
 export default class Selection extends BatchProcessor<WatcherConfig> {
     private phase!: SelectionPhase;

@@ -14,7 +14,7 @@ async function formatPaths(getPath: getPath, paths: string[]) {
     });
 }
 
-export default async function loadResources(opConfig: WatcherConfig, getPaths: getPath) {
+export async function loadResources(opConfig: WatcherConfig, getPaths: getPath) {
     let plugins;
 
     if (opConfig.rules) {
@@ -32,4 +32,8 @@ export default async function loadResources(opConfig: WatcherConfig, getPaths: g
         });
     }
     return { opConfig, plugins };
+}
+
+export fetchMetadata() {
+    
 }

@@ -9,7 +9,7 @@
     "author": "Terascope, LLC <info@terascope.io>",
     "license": "MIT",
     "dependencies": {
-        "@terascope/job-components": "^0.20.0",
+        "@terascope/job-components": "^0.20.2",
         "lodash": "^4.17.11",
         "ts-transforms": "^0.20.0"
     }

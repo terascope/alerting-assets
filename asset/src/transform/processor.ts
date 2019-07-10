@@ -2,8 +2,7 @@
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
 import { WatcherConfig } from './interfaces';
 import { Transform } from 'ts-transforms';
-import loadResources from '../load_resources';
-import _ from 'lodash';
+import { loadResources } from '../utils';
 
 export default class Transforms extends BatchProcessor<WatcherConfig> {
     private transform!: Transform;
