@@ -1,8 +1,8 @@
 
 import { ConvictSchema }  from '@terascope/job-components';
-import { WatcherConfig } from '../transform/interfaces';
+import { PhaseConfig } from '../transform/interfaces';
 
-export default class Schema extends ConvictSchema<WatcherConfig> {
+export default class Schema extends ConvictSchema<PhaseConfig> {
 
     validate(input: any) {
         const validatedSchema = super.validate(input);

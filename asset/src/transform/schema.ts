@@ -1,8 +1,8 @@
 
 import { ConvictSchema }  from '@terascope/job-components';
-import { WatcherConfig } from './interfaces';
+import { PhaseConfig } from './interfaces';
 
-export default class Schema extends ConvictSchema<WatcherConfig> {
+export default class Schema extends ConvictSchema<PhaseConfig> {
     validate(input: any) {
         const validatedSchema = super.validate(input);
         if (!Array.isArray(input.rules) || input.rules.length === 0) throw new Error('you must specify rules path to retrive the rules for this op');

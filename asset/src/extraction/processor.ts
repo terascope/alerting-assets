@@ -1,13 +1,13 @@
 
 import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity } from '@terascope/job-components';
-import { WatcherConfig } from  '../transform/interfaces';
+import { PhaseConfig } from  '../transform/interfaces';
 import { ExtractionPhase, Loader, OperationsManager } from 'ts-transforms';
 import { loadResources } from '../utils';
 
-export default class Extraction extends BatchProcessor<WatcherConfig> {
+export default class Extraction extends BatchProcessor<PhaseConfig> {
     private phase!: ExtractionPhase;
 
-    constructor(context: WorkerContext, opConfig: WatcherConfig, executionConfig: ExecutionConfig) {
+    constructor(context: WorkerContext, opConfig: PhaseConfig, executionConfig: ExecutionConfig) {
         super(context, opConfig, executionConfig);
     }
 
