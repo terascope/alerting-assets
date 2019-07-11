@@ -31,12 +31,16 @@ const config: IndexModelConfig<List> = {
             space: {
                 type: 'keyword'
             },
-            notification_type: {
-                type: 'keyword'
-            },
-            notification_config: {
-                type: 'object'
-            },
+            notifications: {
+                properties: {
+                    type: {
+                        type: 'keyword'
+                    },
+                    config: {
+                        type: 'object'
+                    },
+                }
+            }
         },
     },
     schema: {
@@ -70,17 +74,36 @@ const config: IndexModelConfig<List> = {
             space: {
                 type: 'string'
             },
-            notification_type: {
-                type: 'string'
-            },
-            notification_config: {
-                type: 'object'
-            },
+            notifications: {
+                type: 'array',
+                items: {
+                    type: 'object',
+                    properties: {
+                        type: {
+                            type: 'string'
+                        },
+                        config: {
+                            type: 'object',
+                            additionalProperties: true
+                        },
+                    }
+                },
+                default: [],
+            }
         },
-        required: ['client_id', 'name', 'list', 'space', 'notification_type', 'notification_config'],
+        required: ['client_id', 'name', 'list', 'space'],
     },
     strictMode: false,
 };
+
+interface AnyObj {
+    [key: string]: any;
+}
+
+export interface Notifications {
+    type: string;
+    config: AnyObj;
+}
 
 export interface List extends IndexModelRecord {
     list: string;
@@ -88,8 +111,7 @@ export interface List extends IndexModelRecord {
     users: string[];
     client_id: number;
     name: string;
-    notification_type: string;
-    notification_config: object;
+    notifications: Notifications[];
     description?: string;
     space: string;
 }

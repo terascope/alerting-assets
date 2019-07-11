@@ -55,9 +55,8 @@ describe('Lists', () => {
             client_id: 1,
             users: ['someUserId'],
             name: 'List 1',
-            notification_type: 'email',
-            notification_config: {},
-            space: 'space_1'
+            space: 'space_1',
+            notifications: []
         };
 
         const results = await lists.create(list);
@@ -75,14 +74,13 @@ describe('Lists', () => {
             client_id: 1,
             users: ['otherUserId'],
             name: 'List 2',
-            notification_type: 'text',
-            notification_config: {},
-            space: 'space_1'
+            space: 'space_1',
+            notifications: []
         };
 
         const { id, updated: firstUpdated, created: firstCreated } = await lists.create(list);
-
-        const updateList: UpdateRecordInput<List> = Object.assign({}, list, { id, active: true });
+        const notifications = [{ type: 'text', config: { some: 'config' } }];
+        const updateList: UpdateRecordInput<List> = Object.assign({}, list, { id, active: true, notifications });
 
         await lists.update(updateList);
         const results = await lists.findById(id);
@@ -91,6 +89,8 @@ describe('Lists', () => {
         expect(results.active).toEqual(true);
         expect(results.created).toEqual(firstCreated);
         expect(isLaterThan(results.updated, firstUpdated)).toEqual(true);
+        expect(results.notifications.length).toEqual(1);
+        expect(results.notifications[0]).toEqual(notifications[0]);
     });
 
     it('can get the list', async() => {
@@ -100,9 +100,8 @@ describe('Lists', () => {
             client_id: 1,
             users: ['otherUserId'],
             name: 'List 3',
-            notification_type: 'text',
-            notification_config: {},
-            space: 'space_1'
+            space: 'space_1',
+            notifications: []
         };
 
         const { id } = await lists.create(list);
@@ -122,9 +121,8 @@ describe('Lists', () => {
             client_id: 1,
             users: ['otherUserId'],
             name: 'List 4',
-            notification_type: 'webhook',
-            notification_config: {},
-            space: 'space_1'
+            space: 'space_1',
+            notifications: []
         };
 
         const list2: CreateRecordInput<List> = {
@@ -133,9 +131,8 @@ describe('Lists', () => {
             client_id: 1,
             users: ['otherUserId'],
             name: 'List 5',
-            notification_type: 'email',
-            notification_config: {},
-            space: 'space_1'
+            space: 'space_1',
+            notifications: []
         };
 
         const [{ id: id1 }, { id: id2 }] = await Promise.all([lists.create(list1), lists.create(list2)]);
@@ -164,9 +161,8 @@ describe('Lists', () => {
             client_id: 1,
             users: ['otherUserId'],
             name: 'List 6',
-            notification_type: 'text',
-            notification_config: {},
-            space: 'space_1'
+            space: 'space_1',
+            notifications: []
         };
 
         const { id } = await lists.create(list);
@@ -192,9 +188,8 @@ describe('Lists', () => {
             client_id: 1,
             users: ['otherUserId'],
             name: 'List 61234',
-            notification_type: 'text',
-            notification_config: {},
-            space: 'count_space'
+            space: 'count_space',
+            notifications: []
         };
 
         await lists.create(list);
