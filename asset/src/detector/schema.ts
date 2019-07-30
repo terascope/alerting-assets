@@ -25,6 +25,11 @@ export default class Schema extends ConvictSchema<DetectorConfig> {
                 default: '',
                 format: 'required_String',
             },
+            notification_throttle: {
+                doc: `The time in "ms" that will elapse between the same list notification.
+                IE if list "A" sends an alert, then list "A" will not be able to alert again until the time specified passes.  defaults to 10mins`,
+                default: 10 * 60 * 1000,
+            },
             subscription_timer: {
                 doc: 'The time in "ms" when it will check for changes in Lists, defaults to 10mins',
                 default: 10 * 60 * 1000,

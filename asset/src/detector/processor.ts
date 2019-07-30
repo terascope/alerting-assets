@@ -3,30 +3,16 @@ import { WorkerContext, BatchProcessor, ExecutionConfig, DataEntity, getClient }
 import { Matcher } from 'ts-transforms';
 import { ACLManager } from '@terascope/data-access';
 import { DataType } from '@terascope/data-types';
-// import debounce from 'lodash/debounce';
-import { DetectorConfig } from './interfaces';
+import ThrottledMatcher from './throttled-matcher';
+import { DetectorConfig, Matchers, DetectorRecord } from './interfaces';
 import { ListManager, List } from '../lists';
-
-interface Matchers {
-    [key: string]: Matcher;
-}
-
-interface DetectorRecord extends DataEntity {
-    data: DataEntity;
-    client_id: string;
-    list_id: string;
-}
-
-// class 
-
-// TODO: does this need a flush event?
 
 export default class Detector extends BatchProcessor<DetectorConfig> {
     private listManager!: ListManager;
     private aclManager!: ACLManager;
     private matchers: Matchers = {};
     private waitTimer!: number;
-    private canRun: boolean = false;
+    private setupComplete: boolean = false;
 
     constructor(context: WorkerContext, opConfig: DetectorConfig, executionConfig: ExecutionConfig) {
         super(context, opConfig, executionConfig);
@@ -61,17 +47,18 @@ export default class Detector extends BatchProcessor<DetectorConfig> {
     }
 
     async setupMatcher(lists: List[]) {
-        this.canRun = false;
+        this.setupComplete = false;
+
         const dataTypesConfigs = await Promise.all(lists.map(list => this._getDataTypes(list.space)));
         const dataTypes = dataTypesConfigs.map(config => new DataType(config).toXlucene());
-
         for (const [index, list] of lists.entries()) {
             const matcherConfig = { notification_rules: list.list, types: dataTypes[index] };
-            this.matchers[list.id] = new Matcher(matcherConfig, this.logger);
-            await this.matchers[list.id].init();
+            const matcher = new Matcher(matcherConfig, this.logger);
+            await matcher.init();
+            this.matchers[list.id] = new ThrottledMatcher(matcher, list.id, this.opConfig);
         }
 
-        this.canRun = true;
+        this.setupComplete = true;
     }
 
     async shutdown() {
@@ -79,10 +66,10 @@ export default class Detector extends BatchProcessor<DetectorConfig> {
     }
 
     private async _canRun () {
-        if (this._canRun) return true;
+        if (this.setupComplete) return true;
         return new Promise((resolve) => {
             const timer = setInterval(() => {
-                if (this.canRun) {
+                if (this.setupComplete) {
                     clearInterval(timer);
                     resolve(true);
                 }
@@ -95,16 +82,8 @@ export default class Detector extends BatchProcessor<DetectorConfig> {
 
         await this._canRun();
 
-        for (const [listId, matcher] of Object.entries(this.matchers)) {
-            const matchedRecords = matcher.run(data);
-            // TODO: put delay here
-            matchedRecords.forEach((record) => {
-                results.push(DataEntity.make<DetectorRecord>({
-                    data: record,
-                    client_id: this.opConfig.client_id,
-                    list_id: listId
-                }));
-            });
+        for (const [, throttledMatcher] of Object.entries(this.matchers)) {
+            throttledMatcher.run(data, results);
         }
 
         return results;

@@ -36,10 +36,11 @@ describe('detector', () => {
         // @ts-ignore
 
     let list3ID: string;
-
+ // @ts-ignore
     const testDate = Date.now();
-
+ // @ts-ignore
     const earlyTestDate = new Date(testDate).toISOString();
+     // @ts-ignore
     const laterTestDate = new Date(testDate + 10000).toISOString();
 
     beforeAll(async () => {
@@ -218,7 +219,7 @@ describe('detector', () => {
             notifications: [],
             space: space1.id
         };
-        // TODO: add a date rule
+
         const normalUserlist2: CreateRecordInput<List> = {
             list: `list:2 \n other:things \n date:>=${earlyTestDate}`,
             active: true,
@@ -239,12 +240,11 @@ describe('detector', () => {
             space: space1.id
         };
 
-        [{ id: list1ID }, { id: list2ID }, { id: list3ID }] =  await Promise.all([
+        [{ id: list1ID }, { id: list2ID }, { id: list3ID }] = await Promise.all([
             listManager.createList({ list: normalUserlist1 }, false),
             listManager.createList({ list: normalUserlist2 }, false),
             listManager.createList({ list: adminUserlist1 }, false),
         ]);
-        // console.log("the lists id", list1ID, list2ID, list3ID)
     });
 
     afterAll(async () => {
@@ -256,7 +256,7 @@ describe('detector', () => {
 
     let harness: WorkerTestHarness;
 
-    beforeEach(async () => {
+    beforeEach(async() => {
         const clients = [
             {
                 type: 'elasticsearch',
@@ -273,6 +273,7 @@ describe('detector', () => {
             _op: 'detector',
             data_access_namespace: dataAccessSpace,
             space_name: listNameSpace,
+            notification_throttle: 50,
             subscription_timer: 100
         };
 
@@ -287,7 +288,7 @@ describe('detector', () => {
     });
 
     afterEach(async () => {
-        await harness.shutdown();
+        return harness.shutdown();
     });
 
     it('should be able to match data', async () => {
@@ -377,57 +378,24 @@ describe('detector', () => {
         expect(await harness.runSlice(slice2)).toEqual([results2]);
     });
 
-    it('should be able to throttle ', async () => {
-        const slice = [{ list: 4 }];
-        const slice2 = [{ iam: 'user' }];
+    it('can throttle the number of notifications that are returned for a list', async () => {
+        const slice = [{ list: 1 }];
 
-        const list: CreateRecordInput<List> = {
-            list: 'list:4',
-            active: true,
-            client_id: clientId,
-            users: [normalUser.id],
-            name: 'List 4',
-            notifications: [],
-            space: space1ID
-        };
+        const expectedResults = [
+            {
+                data: slice[0],
+                client_id: 1,
+                list_id: list1ID
+            }
+        ];
 
+        expect(await harness.runSlice(slice)).toEqual(expectedResults);
+        // it should be throttled now
         expect(await harness.runSlice(slice)).toEqual([]);
 
-        const { id } = await listManager.createList({ list }, false);
+        await pDelay(60);
 
-        const results = {
-            data: slice[0],
-            client_id: 1,
-            list_id: id
-        };
-
-        await pDelay(100);
-
-        expect(await harness.runSlice(slice)).toEqual([results]);
-
-        const updatedList: UpdateRecordInput<List> = {
-            list: 'iam:user',
-            active: true,
-            client_id: clientId,
-            users: [normalUser.id],
-            name: 'List 4',
-            notifications: [],
-            space: space1ID,
-            id
-        };
-
-        const results2 = {
-            data: slice2[0],
-            client_id: 1,
-            list_id: id
-        };
-
-        await listManager.updateList({ list: updatedList }, false);
-
-        await pDelay(100);
-
-        expect(await harness.runSlice(slice)).toEqual([]);
-        expect(await harness.runSlice(slice2)).toEqual([results2]);
+        expect(await harness.runSlice(slice)).toEqual(expectedResults);
     });
 
 });
