@@ -7,20 +7,26 @@
         "lint:fix": "yarn run lint -- --fix",
         "postinstall": "yarn --cwd ./asset install",
         "asset:build": "yarn run build",
-        "build": "rimraf asset/dist; tsc --project tsconfig.json --pretty",
+        "build": "rimraf asset/dist; tsc --project tsconfig.build.json --pretty",
         "build:watch": "yarn run build --watch",
-        "test": "jest",
-        "test:watch": "jest --coverage=false --notify --watch --onlyChanged",
-        "test:debug": "env DEBUG='*teraslice*' jest --detectOpenHandles --coverage=false --runInBand"
+        "test": "jest --forceExit --detectOpenHandles",
+        "test:watch": "jest --coverage=false --notify --watch --onlyChanged --forceExit",
+        "test:debug": "env DEBUG='*teraslice*' jest --detectOpenHandles --coverage=false --runInBand --forceExit"
     },
     "repository": "git@github.com:terascope/alerting-assets.git",
     "author": "Terascope, LLC <info@terascope.io>",
     "license": "MIT",
     "devDependencies": {
+        "@terascope/data-access": "^0.12.5",
+        "@terascope/data-types": "^0.4.1",
+        "@terascope/job-components": "^0.20.5",
         "@terascope/teraslice-op-test-harness": "^1.7.0",
+        "@types/elasticsearch": "^5.0.34",
         "@types/jest": "^24.0.15",
         "@types/lodash": "^4.14.136",
         "@types/node": "^12.6.1",
+        "elasticsearch": "^15.4.1",
+        "elasticsearch-store": "^0.10.2",
         "jest": "^24.8.0",
         "jest-extended": "^0.11.0",
         "rimraf": "^2.6.2",
@@ -31,5 +37,8 @@
     },
     "engines": {
         "node": ">=8.0.0"
+    },
+    "dependencies": {
+        "teraslice-test-harness": "^0.8.1"
     }
 }
