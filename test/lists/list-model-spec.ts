@@ -3,7 +3,7 @@ import 'jest-extended';
 import { Client } from 'elasticsearch';
 import Lists, { List } from '../../asset/src/lists/model';
 import { CreateRecordInput, UpdateRecordInput } from 'elasticsearch-store';
-import { TSError, get } from '@terascope/job-components';
+import { TSError, get, startsWith } from '@terascope/job-components';
 
 const {
     ELASTICSEARCH_HOST = 'http://localhost:9200',
@@ -13,12 +13,11 @@ function makeClient(): Client {
     return new Client({
         host: ELASTICSEARCH_HOST,
         log: 'error',
-        apiVersion: '6.8'
+        apiVersion: '6.5'
     });
 }
 
 async function cleanupIndex(lists: Lists) {
-    // @ts-ignore
     const { client, indexQuery } = lists.store;
 
     return client.indices.delete({
@@ -65,6 +64,59 @@ describe('Lists', () => {
         expect(results.id).toBeDefined();
         expect(results.created).toBeDefined();
         expect(results.updated).toBeDefined();
+    });
+
+    it('cannot create a list with same name and client_id', async () => {
+        const list1: CreateRecordInput<List> = {
+            list: 'key:field AND other:things',
+            active: false,
+            client_id: 1,
+            users: ['someUserId'],
+            name: 'List 1234',
+            space: 'space_1234',
+            notifications: []
+        };
+        const list2: CreateRecordInput<List> = {
+            list: 'key:field AND other:things',
+            active: false,
+            client_id: 1,
+            users: ['someUserId'],
+            name: 'List 1234',
+            space: 'space_1234',
+            notifications: []
+        };
+        const list3: CreateRecordInput<List> = {
+            list: 'key:field AND other:things',
+            active: false,
+            client_id: 11111,
+            users: ['someUserId'],
+            name: 'List 1234',
+            space: 'space_4321',
+            notifications: []
+        };
+
+        const results1 = await lists.create(list1);
+        const results3 = await lists.create(list3);
+
+        expect(results1).toBeDefined();
+        expect(results1.id).toBeDefined();
+        expect(results1.created).toBeDefined();
+        expect(results1.updated).toBeDefined();
+
+        expect(results3).toBeDefined();
+        expect(results3.id).toBeDefined();
+        expect(results3.created).toBeDefined();
+        expect(results3.updated).toBeDefined();
+
+        let errMsg;
+
+        try {
+            await lists.create(list2);
+        } catch (err) {
+            errMsg = err;
+        }
+
+        expect(errMsg.message).toEqual('List requires name to be unique');
     });
 
     it('can update a list', async () => {
@@ -178,7 +230,8 @@ describe('Lists', () => {
         }
 
         expect(myError).toBeDefined();
-        expect(get(myError, 'message')).toEqual(`Unable to find List by id: "${id}"`);
+        const hasMessage = startsWith(get(myError, 'message'), `Unable to find List by id: "${id}"`);
+        expect(hasMessage).toEqual(true);
     });
 
     it('can count lists', async() => {

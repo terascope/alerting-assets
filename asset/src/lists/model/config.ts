@@ -1,15 +1,12 @@
 
-import { IndexModelConfig, IndexModelRecord } from 'elasticsearch-store';
-
+import { IndexModelConfig } from 'elasticsearch-store';
+import { List } from '../interfaces';
 // TODO: should use datatypes to generate mapping here?
 const config: IndexModelConfig<List> = {
     version: 1,
     name: 'lists',
     mapping: {
         properties: {
-            client_id: {
-                type: 'integer',
-            },
             name: {
                 type: 'keyword',
                 fields: {
@@ -45,19 +42,17 @@ const config: IndexModelConfig<List> = {
     },
     schema: {
         properties: {
-            client_id: {
-                type: 'number',
-                multipleOf: 1.0,
-                minimum: 0,
-            },
+
             name: {
                 type: 'string',
             },
             description: {
                 type: 'string',
+                default: ''
             },
             list: {
                 type: 'string',
+                default: ''
             },
             active: {
                 type: 'boolean',
@@ -91,29 +86,10 @@ const config: IndexModelConfig<List> = {
                 default: [],
             }
         },
-        required: ['client_id', 'name', 'list', 'space'],
+        required: ['name', 'space'],
     },
-    strictMode: false,
+    strict_mode: false,
+    unique_fields: ['name']
 };
-
-interface AnyObj {
-    [key: string]: any;
-}
-
-export interface Notifications {
-    type: string;
-    config: AnyObj;
-}
-
-export interface List extends IndexModelRecord {
-    list: string;
-    active: boolean;
-    users: string[];
-    client_id: number;
-    name: string;
-    notifications: Notifications[];
-    description?: string;
-    space: string;
-}
 
 export default config;
