@@ -51,7 +51,7 @@ export class ListManager {
 
     async findList(args: FindOneArgs<List>, authUser: AuthUser) {
         // TODO: figure out why acl find does not use empty obj
-        return this._lists.findByAnyId(args.id, {}, this._getListQueryAccess(authUser));
+        return this._lists.findById(args.id, {}, this._getListQueryAccess(authUser));
     }
 
     async findLists(args: FindArgs<List> = {}, authUser: AuthUser) {
@@ -116,18 +116,16 @@ export class ListManager {
         };
     }
 
-    // @ts-ignore
-
     async removeList(args: { id: string }, authUser: AuthUser) {
-        // need to validateCanRemove
+        const record = await this._validateCanRemove(args.id, authUser);
+        if (!record) return false;
+
         await this._lists.deleteById(args.id);
         return true;
     }
 
-    // @ts-ignore
     async countLists(args: { query?: string } = {}, authUser: AuthUser) {
-        // TODO: should restrain by listQueryAcess
-        return this._lists.count(args.query);
+        return this._lists.count(args.query, this._getListQueryAccess(authUser));
     }
 
     private async _validateListInput(_list: Partial<List>, authUser: AuthUser) {
@@ -281,5 +279,26 @@ export class ListManager {
             },
             this.logger
         );
+    }
+
+    private async _validateCanRemove(id: string, authUser: AuthUser) {
+        const type = this._getUserType(authUser);
+        const clientId = this._getUserClientId(authUser);
+        let record;
+        try {
+            record = await this.findList({ id }, false);
+        } catch (err) {}
+
+        if (
+            type === 'DATAADMIN' ||
+            (type === 'ADMIN' && record && clientId !== record.client_id) ||
+            (type === 'USER' && record && (clientId !== record.client_id || (authUser && record.users.includes(authUser.id))))
+        ) {
+            throw new ts.TSError('User does not have permission to remove list', {
+                statusCode: 403,
+            });
+        }
+
+        return record;
     }
 }

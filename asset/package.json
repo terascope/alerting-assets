@@ -16,6 +16,7 @@
         "elasticsearch": "^15.4.1",
         "elasticsearch-store": "^0.10.2",
         "lodash": "^4.17.11",
-        "ts-transforms": "^0.21.0"
+        "ts-transforms": "^0.21.0",
+        "xlucene-evaluator": "^0.9.5"
     }
 }

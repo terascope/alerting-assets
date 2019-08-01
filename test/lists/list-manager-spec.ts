@@ -1012,76 +1012,261 @@ describe('ListManager', () => {
 
     });
 
-    // it('can update a list', async () => {
-    //     const list: CreateRecordInput<List> = {
-    //         list: 'key:field OR other:things',
-    //         active: false,
-    //         client_id: 1,
-    //         users: ['otherUserId'],
-    //         name: 'List 2',
-    //         notification_type: 'text',
-    //         space: space1.id
-    //     };
+    describe('on remove', () => {
+        it('program can remove any list', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'some:data',
+                active: false,
+                client_id: 1,
+                users: [normalUser.id],
+                name: 'List 71',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
 
-    //     const { id, updated: firstUpdated, created: firstCreated } = await listManager.createList({ list });
+            const { id } = await listManager.createList({ list }, false);
 
-    //     const updateList: UpdateRecordInput<List> = Object.assign({}, list, { id, active: true });
+            const isDeleted = await listManager.removeList({ id }, false);
 
-    //     const results = await listManager.updateList({ list: updateList });
+            expect(isDeleted).toEqual(true);
 
-    //     expect(results).toBeDefined();
-    //     expect(results.active).toEqual(true);
-    //     expect(results.created).toEqual(firstCreated);
-    //     expect(isLaterThan(results.updated, firstUpdated)).toEqual(true);
-    // });
+            let myError: TSError|undefined;
 
-    // it('can remove a list', async() => {
-    //     const list: CreateRecordInput<List> = {
-    //         list: 'some:data',
-    //         active: false,
-    //         client_id: 1,
-    //         users: ['otherUserId'],
-    //         name: 'List 6',
-    //         notification_type: 'text',
+            try {
+                await listManager.findList({ id }, false);
+            } catch (err) {
+                myError = err;
+            }
 
-    //         space: space1.id
-    //     };
+            expect(myError).toBeDefined();
+            expect(get(myError, 'message')).toEqual(`Unable to find List by id: "${id}"`);
+        });
 
-    //     const { id } = await listManager.createList({ list });
+        it('SUPERADMIN can remove any list', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'some:data',
+                active: false,
+                client_id: 1,
+                users: [superAdminUser.id],
+                name: 'List 71',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
 
-    //     const isDeleted = await listManager.removeList({ id });
+            const { id } = await listManager.createList({ list }, superAdminUser);
 
-    //     expect(isDeleted).toEqual(true);
+            const isDeleted = await listManager.removeList({ id }, superAdminUser);
 
-    //     let myError: TSError|undefined;
+            expect(isDeleted).toEqual(true);
 
-    //     try {
-    //         await listManager.findList({ id });
-    //     } catch (err) {
-    //         myError = err;
-    //     }
+            let myError: TSError|undefined;
 
-    //     expect(myError).toBeDefined();
-    //     expect(get(myError, 'message')).toEqual(`Unable to find List by id: "${id}"`);
-    // });
+            try {
+                await listManager.findList({ id }, false);
+            } catch (err) {
+                myError = err;
+            }
 
-    // it('can count lists', async() => {
-    //     const list: CreateRecordInput<List> = {
-    //         list: 'some:data',
-    //         active: false,
-    //         client_id: 1,
-    //         users: ['otherUserId'],
-    //         name: 'List 61234',
-    //         notification_type: 'text',
+            expect(myError).toBeDefined();
+            expect(get(myError, 'message')).toEqual(`Unable to find List by id: "${id}"`);
+        });
 
-    //         space: 'count_space'
-    //     };
+        it('DATADMIN CANNOT remove any list', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'some:data',
+                active: false,
+                client_id: 1,
+                users: [superAdminUser.id],
+                name: 'List 71',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
 
-    //     await listManager.createList({ list });
+            const { id } = await listManager.createList({ list }, false);
 
-    //     const query = `space:${list.space}`;
-    //     const count = await listManager.countLists({ query });
+            try {
+                await listManager.removeList({ id }, dataAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to remove list');
+                expect(err.statusCode).toEqual(403);
+            }
+        });
 
-    //     expect(count).toEqual(1);
-    // });
+        it('ADMIN can remove any list with the same clientID', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [normalUser.id],
+                name: 'List 72',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 154324,
+                users: [normalAdmin.id],
+                name: 'List 73',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }] = await Promise.all([listManager.createList({ list }, false), listManager.createList({ list: list2 }, false)]);
+
+            const isDeleted = await listManager.removeList({ id: id1 }, normalAdmin);
+
+            expect(isDeleted).toEqual(true);
+
+            let myError: TSError|undefined;
+
+            try {
+                await listManager.findList({ id: id1 }, false);
+            } catch (err) {
+                myError = err;
+            }
+
+            expect(myError).toBeDefined();
+            expect(get(myError, 'message')).toEqual(`Unable to find List by id: "${id1}"`);
+
+            try {
+                await listManager.removeList({ id: id2 }, normalAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to remove list');
+                expect(err.statusCode).toEqual(403);
+            }
+        });
+
+        it('USER can remove list with the same clientID and id in users field', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [normalUser.id],
+                name: 'List 75',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [normalAdmin.id],
+                name: 'List 76',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list3: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 154324,
+                users: [normalUser.id],
+                name: 'List 77',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }, { id: id3 }] = await Promise.all([
+                listManager.createList({ list }, false),
+                listManager.createList({ list: list2 }, false),
+                listManager.createList({ list: list3 }, false)
+
+            ]);
+
+            const isDeleted = await listManager.removeList({ id: id1 }, normalAdmin);
+
+            expect(isDeleted).toEqual(true);
+
+            let myError: TSError|undefined;
+
+            try {
+                await listManager.findList({ id: id1 }, false);
+            } catch (err) {
+                myError = err;
+            }
+
+            expect(myError).toBeDefined();
+            expect(get(myError, 'message')).toEqual(`Unable to find List by id: "${id1}"`);
+
+            try {
+                await listManager.removeList({ id: id2 }, normalAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to remove list');
+                expect(err.statusCode).toEqual(403);
+            }
+
+            try {
+                await listManager.removeList({ id: id3 }, normalAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to remove list');
+                expect(err.statusCode).toEqual(403);
+            }
+        });
+    });
+
+    describe('can count', () => {
+        it('can count lists', async() => {
+            const list1: CreateRecordInput<List> = {
+                list: 'some:data',
+                active: true,
+                client_id: 1,
+                users: [normalAdmin.id],
+                name: 'List100',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+            const list2: CreateRecordInput<List> = {
+                list: 'some:data',
+                active: true,
+                client_id: 1,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List101',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+            const list3: CreateRecordInput<List> = {
+                list: 'some:data',
+                active: true,
+                client_id: 412341234,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List102',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            await Promise.all([
+                listManager.createList({ list: list1 }, false),
+                listManager.createList({ list: list2 }, false),
+                listManager.createList({ list: list3 }, false),
+            ]);
+
+            const query = 'name:List100 OR name:List101 OR name:List102';
+
+            const [programCount, superAdminCount, adminCount, userCount] = await Promise.all([
+                listManager.countLists({ query }, false),
+                listManager.countLists({ query }, superAdminUser),
+                listManager.countLists({ query }, normalAdmin),
+                listManager.countLists({ query }, normalUser),
+            ]);
+
+            expect(programCount).toEqual(3);
+            expect(superAdminCount).toEqual(3);
+            expect(adminCount).toEqual(2);
+            expect(userCount).toEqual(1);
+
+            let dataAdminError;
+
+            try {
+                await  listManager.countLists({ query }, dataAdmin);
+            } catch (err) {
+                dataAdminError = err;
+            }
+
+            expect(dataAdminError.message).toEqual('User does not have permission to read lists');
+            expect(dataAdminError.statusCode).toEqual(403);
+        });
+    });
 });
