@@ -16,8 +16,6 @@ function isLaterThan(newDate: string, oldDate: string) {
     return new Date(newDate).getTime() > new Date(oldDate).getTime();
 }
 
-// TODO: test regualr admin
-
 describe('ListManager', () => {
 
     const client = makeClient();
@@ -243,7 +241,7 @@ describe('ListManager', () => {
             try {
                 await listManager.createList({ list }, normalUser);
             } catch (err) {
-                expect(err.message).toEqual("User doesn't have permission to write to that client");
+                expect(err.message).toEqual('User does not have permission to write to that client');
                 expect(err.statusCode).toEqual(403);
                 expect(err.code).toEqual('FORBIDDEN');
             }
@@ -264,7 +262,7 @@ describe('ListManager', () => {
             try {
                 await listManager.createList({ list }, normalAdmin);
             } catch (err) {
-                expect(err.message).toEqual("User doesn't have permission to write to that client");
+                expect(err.message).toEqual('User does not have permission to write to that client');
                 expect(err.statusCode).toEqual(403);
                 expect(err.code).toEqual('FORBIDDEN');
             }
@@ -285,7 +283,7 @@ describe('ListManager', () => {
             try {
                 await listManager.createList({ list }, dataAdmin);
             } catch (err) {
-                expect(err.message).toEqual("User doesn't have permission to write to that client");
+                expect(err.message).toEqual('User does not have permission to write to that client');
                 expect(err.statusCode).toEqual(403);
                 expect(err.code).toEqual('FORBIDDEN');
             }
@@ -318,7 +316,7 @@ describe('ListManager', () => {
                 await listManager.createList({ list: invalidUserlist }, normalUser);
                 throw new Error('this should have failed from createList');
             } catch (err) {
-                expect(err.message).toEqual('user id must be set in users list');
+                expect(err.message).toEqual('User does not have permission to alter this list');
                 expect(err.statusCode).toEqual(422);
             }
 
@@ -471,6 +469,460 @@ describe('ListManager', () => {
         });
     });
 
+    describe('can find lists', () => {
+        it('programs can get multiple lists from any user and any clientID', async() => {
+            const list1: CreateRecordInput<List> = {
+                list: 'first:field',
+                active: false,
+                client_id: 1,
+                users: [],
+                name: 'List 41',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'second:field',
+                active: false,
+                client_id: 99,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 42',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }] = await Promise.all([listManager.createList({ list: list1 }, false), listManager.createList({ list: list2 }, false)]);
+            const query = `id:${id1} OR id:${id2}`;
+
+            const results = await listManager.findLists({ query }, false);
+
+            expect(Array.isArray(results)).toEqual(true);
+            expect(results.length).toEqual(2);
+
+            const results1 = results.find(obj => obj.id === id1);
+            const results2 = results.find(obj => obj.id === id2);
+
+            if (!results1 || !results2) {
+                throw new Error('did not find lists');
+            }
+
+            for (const key in list1) {
+                expect(results1[key]).toEqual(list1[key]);
+            }
+
+            for (const key in list2) {
+                expect(results2[key]).toEqual(list2[key]);
+            }
+
+            const singular = await listManager.findList({ id: id1 }, false);
+
+            for (const key in list1) {
+                expect(singular[key]).toEqual(list1[key]);
+            }
+        });
+
+        it('SUPERADMIN can get multiple lists from any user from any clientID', async() => {
+            const list1: CreateRecordInput<List> = {
+                list: 'first:field',
+                active: false,
+                client_id: 1,
+                users: [],
+                name: 'List 43',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'second:field',
+                active: false,
+                client_id: 99,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 44',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }] = await Promise.all([listManager.createList({ list: list1 }, false), listManager.createList({ list: list2 }, false)]);
+            const query = `id:${id1} OR id:${id2}`;
+
+            const results = await listManager.findLists({ query }, superAdminUser);
+
+            expect(Array.isArray(results)).toEqual(true);
+            expect(results.length).toEqual(2);
+
+            const results1 = results.find(obj => obj.id === id1);
+            const results2 = results.find(obj => obj.id === id2);
+
+            if (!results1 || !results2) {
+                throw new Error('did not find lists');
+            }
+
+            for (const key in list1) {
+                expect(results1[key]).toEqual(list1[key]);
+            }
+
+            for (const key in list2) {
+                expect(results2[key]).toEqual(list2[key]);
+            }
+
+            const singular = await listManager.findList({ id: id1 }, superAdminUser);
+
+            for (const key in list1) {
+                expect(singular[key]).toEqual(list1[key]);
+            }
+        });
+
+        it('DATADMIN CANNOT get multiple list', async() => {
+            expect.hasAssertions();
+
+            const list1: CreateRecordInput<List> = {
+                list: 'first:field',
+                active: false,
+                client_id: 1,
+                users: [],
+                name: 'List 45',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'second:field',
+                active: false,
+                client_id: 1,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 46',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }] = await Promise.all([listManager.createList({ list: list1 }, false), listManager.createList({ list: list2 }, false)]);
+            const query = `id:${id1} OR id:${id2}`;
+
+            try {
+                await listManager.findLists({ query }, dataAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to read lists');
+                expect(err.statusCode).toEqual(403);
+                expect(err.code).toEqual('FORBIDDEN');
+            }
+
+            try {
+                await listManager.findList({ id: id1 }, dataAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to read lists');
+                expect(err.statusCode).toEqual(403);
+                expect(err.code).toEqual('FORBIDDEN');
+            }
+        });
+
+        it('ADMIN can get multiple lists from any user with the same clientID', async() => {
+            const list1: CreateRecordInput<List> = {
+                list: 'first:field',
+                active: false,
+                client_id: 1,
+                users: [],
+                name: 'List 47',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'second:field',
+                active: false,
+                client_id: 1,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 48',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list3: CreateRecordInput<List> = {
+                list: 'third:field',
+                active: false,
+                client_id: 99,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 4234523',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }, { id: id3 }] = await Promise.all([
+                listManager.createList({ list: list1 }, false),
+                listManager.createList({ list: list2 }, false),
+                listManager.createList({ list: list3 }, false),
+            ]);
+
+            const query = `id:${id1} OR id:${id2} OR id:${id3}`;
+
+            const results = await listManager.findLists({ query }, normalAdmin);
+
+            expect(Array.isArray(results)).toEqual(true);
+            expect(results.length).toEqual(2);
+
+            const results1 = results.find(obj => obj.id === id1);
+            const results2 = results.find(obj => obj.id === id2);
+
+            if (!results1 || !results2) {
+                throw new Error('did not find lists');
+            }
+
+            for (const key in list1) {
+                expect(results1[key]).toEqual(list1[key]);
+            }
+
+            for (const key in list2) {
+                expect(results2[key]).toEqual(list2[key]);
+            }
+
+            const singular = await listManager.findList({ id: id1 }, normalAdmin);
+
+            for (const key in list1) {
+                expect(singular[key]).toEqual(list1[key]);
+            }
+        });
+
+        it('USER can get multiple lists only from itself', async() => {
+            const list1: CreateRecordInput<List> = {
+                list: 'first:field',
+                active: false,
+                client_id: 1,
+                users: [normalAdmin.id],
+                name: 'List 49',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'second:field',
+                active: false,
+                client_id: 1,
+                users: [normalUser.id],
+                name: 'List 50',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list3: CreateRecordInput<List> = {
+                list: 'third:field',
+                active: false,
+                client_id: 99,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 423452333',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }, { id: id3 }] = await Promise.all([
+                listManager.createList({ list: list1 }, false),
+                listManager.createList({ list: list2 }, false),
+                listManager.createList({ list: list3 }, false),
+            ]);
+
+            const query = `id:${id1} OR id:${id2} OR id:${id3}`;
+
+            const results = await listManager.findLists({ query }, normalUser);
+
+            expect(Array.isArray(results)).toEqual(true);
+            expect(results.length).toEqual(1);
+
+            const results1 = results.find(obj => obj.id === id2);
+
+            if (!results1) {
+                throw new Error('did not find lists');
+            }
+
+            for (const key in list2) {
+                expect(results1[key]).toEqual(list2[key]);
+            }
+
+            const singular = await listManager.findList({ id: id2 }, normalUser);
+
+            for (const key in list1) {
+                expect(singular[key]).toEqual(list2[key]);
+            }
+        });
+    });
+
+    describe('on update', () => {
+        it('programs can update any list', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1112233,
+                users: [normalUser.id],
+                name: 'List 51',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const { id } = await listManager.createList({ list }, false);
+            const updatedList: UpdateRecordInput<List> = Object.assign({}, list, { id, list: 'other:query', active: true });
+
+            const results = await listManager.updateList({ list: updatedList }, false);
+
+            expect(results).toBeDefined();
+            for (const key in list) {
+                expect(results[key]).toEqual(updatedList[key]);
+            }
+        });
+
+        it('SUPERUSER can update any list', async() => {
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 11122343,
+                users: [normalUser.id],
+                name: 'List 52',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const { id } = await listManager.createList({ list }, false);
+            const updatedList: UpdateRecordInput<List> = Object.assign({}, list, { id, list: 'other:query', active: true });
+
+            const results = await listManager.updateList({ list: updatedList }, superAdminUser);
+
+            expect(results).toBeDefined();
+            for (const key in list) {
+                expect(results[key]).toEqual(updatedList[key]);
+            }
+        });
+
+        it('DATAADMIN can not update any list', async() => {
+            expect.hasAssertions();
+
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [dataAdmin.id],
+                name: 'List 53',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const { id } = await listManager.createList({ list }, false);
+            const updatedList: UpdateRecordInput<List> = Object.assign({}, list, { id, list: 'other:query', active: true });
+
+            try {
+                await listManager.updateList({ list: updatedList }, dataAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to write to that client');
+                expect(err.statusCode).toEqual(403);
+                expect(err.code).toEqual('FORBIDDEN');
+            }
+        });
+
+        it('ADMIN can update any list with the same clientID', async() => {
+            expect.hasAssertions();
+
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [normalUser.id],
+                name: 'List 54',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 15432,
+                users: [normalAdmin.id],
+                name: 'List 54',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }] = await Promise.all([listManager.createList({ list }, false), listManager.createList({ list: list2 }, false)]);
+            const updatedList1: UpdateRecordInput<List> = Object.assign({}, list, { id: id1, list: 'other:query', active: true });
+            const updatedList2: UpdateRecordInput<List> = Object.assign({}, list, { id: id2, list: 'other:query', active: true });
+
+            const results = await listManager.updateList({ list: updatedList1 }, superAdminUser);
+
+            expect(results).toBeDefined();
+            for (const key in list) {
+                expect(results[key]).toEqual(updatedList1[key]);
+            }
+
+            try {
+                await listManager.updateList({ list: updatedList2 }, normalAdmin);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to write to that client');
+                expect(err.statusCode).toEqual(403);
+                expect(err.code).toEqual('FORBIDDEN');
+            }
+        });
+
+        it('USER can update any list that has his id in users field', async() => {
+            expect.hasAssertions();
+
+            const list: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [normalAdmin.id],
+                name: 'List 57',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list2: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 1,
+                users: [normalAdmin.id, normalUser.id],
+                name: 'List 58',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const list3: CreateRecordInput<List> = {
+                list: 'key:field',
+                active: false,
+                client_id: 154325,
+                users: [normalAdmin.id],
+                name: 'List 59',
+                notifications: [goodEmailNotification],
+                space: space1.id
+            };
+
+            const [{ id: id1 }, { id: id2 }, { id: id3 }] = await Promise.all([
+                listManager.createList({ list }, false),
+                listManager.createList({ list: list2 }, false),
+                listManager.createList({ list: list3 }, false)
+            ]);
+
+            const updatedList1: UpdateRecordInput<List> = Object.assign({}, list, { id: id1, list: 'other:query', active: true });
+            const updatedList2: UpdateRecordInput<List> = Object.assign({}, list2, { id: id2, list: 'really:works', active: true });
+            const updatedList3: UpdateRecordInput<List> = Object.assign({}, list3, { id: id3, list: 'other:query', active: true });
+
+            try {
+                await listManager.updateList({ list: updatedList1 }, normalUser);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to alter this list');
+                expect(err.statusCode).toEqual(422);
+            }
+
+            const results = await listManager.updateList({ list: updatedList2 }, normalUser);
+
+            expect(results).toBeDefined();
+            for (const key in list) {
+                expect(results[key]).toEqual(updatedList2[key]);
+            }
+
+            try {
+                await listManager.updateList({ list: updatedList3 }, normalUser);
+            } catch (err) {
+                expect(err.message).toEqual('User does not have permission to write to that client');
+                expect(err.statusCode).toEqual(403);
+                expect(err.code).toEqual('FORBIDDEN');
+            }
+        });
+    });
+
     describe('on subscription', () => {
         it('calls a function on all lists active lists on start', async () => {
             let results: List[] = [];
@@ -581,67 +1033,6 @@ describe('ListManager', () => {
     //     expect(results.active).toEqual(true);
     //     expect(results.created).toEqual(firstCreated);
     //     expect(isLaterThan(results.updated, firstUpdated)).toEqual(true);
-    // });
-
-    // it('can get the list', async() => {
-    //     const list: CreateRecordInput<List> = {
-    //         list: 'key:field',
-    //         active: false,
-    //         client_id: 1,
-    //         users: ['otherUserId'],
-    //         name: 'List 3',
-    //         notification_type: 'text',
-    //         space: space1.id
-    //     };
-
-    //     const { id } = await listManager.createList({ list });
-
-    //     const results = await listManager.findList({ id });
-
-    //     expect(results).toBeDefined();
-    //     for (const key in list) {
-    //         expect(results[key]).toEqual(list[key]);
-    //     }
-    // });
-
-    // it('can get multiple list', async() => {
-    //     const list1: CreateRecordInput<List> = {
-    //         list: 'first:field',
-    //         active: false,
-    //         client_id: 1,
-    //         users: ['otherUserId'],
-    //         name: 'List 4',
-    //         notification_type: 'webhook',
-    //         space: space1.id
-    //     };
-
-    //     const list2: CreateRecordInput<List> = {
-    //         list: 'second:field',
-    //         active: false,
-    //         client_id: 1,
-    //         users: ['otherUserId'],
-    //         name: 'List 5',
-    //         notifications: [],
-    //         space: space1.id
-    //     };
-
-    //     const [{ id: id1 }, { id: id2 }] = await Promise.all([listManager.createList({ list: list1 }), listManager.createList({ list: list2 })]);
-    //     const query = `id:${id1} OR id:${id2}`;
-
-    //     const results = await listManager.findLists({ query });
-
-    //     expect(Array.isArray(results)).toEqual(true);
-    //     expect(results.length).toEqual(2);
-
-    //     const [results1, results2] = results;
-
-    //     for (const key in list1) {
-    //         expect(results1[key]).toEqual(list1[key]);
-    //     }
-
-    //     for (const key in list2) {
-    //         expect(results2[key]).toEqual(list2[key]);
-    //     }
     // });
 
     // it('can remove a list', async() => {

@@ -6,7 +6,7 @@ import { ACLManager, User } from '@terascope/data-access';
 import { CreateRecordInput, UpdateRecordInput } from 'elasticsearch-store';
 import { LATEST_VERSION } from '@terascope/data-types';
 import { makeClient, cleanupIndex } from './utils';
-import { ListManager, List } from '../asset/src/lists';
+import { ListManager, List, Email } from '../asset/src/lists';
 
 const idField = '_key';
 const dataAccessSpace = 'test_detector_data_access';
@@ -42,6 +42,15 @@ describe('detector', () => {
     const earlyTestDate = new Date(testDate).toISOString();
      // @ts-ignore
     const laterTestDate = new Date(testDate + 10000).toISOString();
+
+    const goodEmailNotification: Email = {
+        type: 'EMAIL',
+        config: {
+            subject: 'an alert',
+            from: 'busniess@othercompany.com',
+            to: ['person@company.com'],
+        }
+    };
 
     beforeAll(async () => {
         await Promise.all([
@@ -216,7 +225,7 @@ describe('detector', () => {
             client_id: clientId,
             users: [normalUser.id],
             name: 'List 1',
-            notifications: [],
+            notifications: [goodEmailNotification],
             space: space1.id
         };
 
@@ -226,7 +235,7 @@ describe('detector', () => {
             client_id: clientId,
             users: [normalUser.id],
             name: 'List 2',
-            notifications: [],
+            notifications: [goodEmailNotification],
             space: space2.id
         };
 
@@ -236,7 +245,7 @@ describe('detector', () => {
             client_id: clientId,
             users: [adminUser.id],
             name: 'List 3',
-            notifications: [],
+            notifications: [goodEmailNotification],
             space: space1.id
         };
 
@@ -335,7 +344,7 @@ describe('detector', () => {
             client_id: clientId,
             users: [normalUser.id],
             name: 'List 4',
-            notifications: [],
+            notifications: [goodEmailNotification],
             space: space1ID
         };
 
@@ -359,7 +368,7 @@ describe('detector', () => {
             client_id: clientId,
             users: [normalUser.id],
             name: 'List 4',
-            notifications: [],
+            notifications: [goodEmailNotification],
             space: space1ID,
             id
         };

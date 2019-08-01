@@ -4,6 +4,7 @@ import * as ts from '@terascope/job-components';
 import { Matcher } from 'ts-transforms';
 import _ from 'lodash';
 import { CreateRecordInput, UpdateRecordInput } from 'elasticsearch-store';
+import { CachedQueryAccess } from 'xlucene-evaluator';
 import { ManagerConfig, FindOneArgs, FindArgs, AuthUser, ACLManager, UserTypes, User } from '@terascope/data-access';
 import Lists, { List } from './model';
 import { Notifications, TimerDict, ListDict, SubscriptionCleanup, subscriptionCb } from './interfaces';
@@ -12,11 +13,14 @@ import { validateNotifications } from './utils';
 const SUPERADMIN = 'SUPERADMIN';
 const USER = 'USER';
 const DATAADMIN = 'DATAADMIN';
+// @ts-ignore
+const ADMIN = 'ADMIN';
 
 export class ListManager {
     logger: ts.Logger;
     private readonly _lists: Lists;
     private _aclManager: ACLManager;
+    private readonly _queryAccess = new CachedQueryAccess();
     private _timer: TimerDict;
     private canShutdown = true;
 
@@ -29,18 +33,6 @@ export class ListManager {
 
     async initialize() {
         return Promise.all([this._lists.initialize(), this._aclManager.initialize()]);
-    }
-
-    private async _subscriptionCallIsDone() {
-        if (this.canShutdown) return true;
-        return new Promise((resolve) => {
-            const timer = setInterval(() => {
-                if (this.canShutdown) {
-                    clearInterval(timer);
-                    resolve(true);
-                }
-            });
-        });
     }
 
     async shutdown() {
@@ -57,19 +49,26 @@ export class ListManager {
         ]);
     }
 
-    // @ts-ignore
     async findList(args: FindOneArgs<List>, authUser: AuthUser) {
-        return this._lists.findByAnyId(args.id, args);
+        // TODO: figure out why acl find does not use empty obj
+        return this._lists.findByAnyId(args.id, {}, this._getListQueryAccess(authUser));
     }
 
-    // @ts-ignore
     async findLists(args: FindArgs<List> = {}, authUser: AuthUser) {
-        return this._lists.find(args.query, args);
+        // TODO: figure out why acl find does not use empty obj
+        return this._lists.find(args.query, {}, this._getListQueryAccess(authUser));
     }
 
     async createList(args: { list: CreateRecordInput<List> }, authUser: AuthUser) {
         await this._validateListInput(args.list, authUser);
         return this._lists.create(args.list);
+    }
+
+    async updateList(args: { list: UpdateRecordInput<List> }, authUser: AuthUser) {
+        await this._validateListInput(args.list, authUser);
+        await this._lists.update(args.list);
+
+        return this._lists.findById(args.list.id, {});
     }
 
     async subscribe(clientId: number, cb: subscriptionCb, time: number): Promise<SubscriptionCleanup> {
@@ -117,13 +116,6 @@ export class ListManager {
         };
     }
 
-    async updateList(args: { list: UpdateRecordInput<List> }, authUser: AuthUser) {
-         // need to validateCanUpdate
-        await this._validateListInput(args.list, authUser);
-        await this._lists.update(args.list);
-
-        return this._lists.findById(args.list.id, {});
-    }
     // @ts-ignore
 
     async removeList(args: { id: string }, authUser: AuthUser) {
@@ -152,8 +144,9 @@ export class ListManager {
         if (!input.id && input.client_id == null) {
             input.client_id = clientId;
         }
+
         if (type === DATAADMIN || (input.client_id && clientId !== input.client_id)) {
-            throw new ts.TSError("User doesn't have permission to write to that client", {
+            throw new ts.TSError('User does not have permission to write to that client', {
                 statusCode: 403,
             });
         }
@@ -192,11 +185,11 @@ export class ListManager {
         } catch (err) {
             throw new ts.TSError('Invalid users field in list', { statusCode: 422 });
         }
-            // A user not found would have thrown, so we can return true here
+
         if (userID && userType) {
             if (userType === 'USER') {
                 const wasFound = results.find(foundUser => foundUser.id === userID);
-                if (!wasFound) throw new ts.TSError('user id must be set in users list', { statusCode: 422 });
+                if (!wasFound) throw new ts.TSError('User does not have permission to alter this list', { statusCode: 422 });
             }
         }
 
@@ -247,5 +240,46 @@ export class ListManager {
 
         await Promise.all(validations);
         return true;
+    }
+
+    private async _subscriptionCallIsDone() {
+        if (this.canShutdown) return true;
+        return new Promise((resolve) => {
+            const timer = setInterval(() => {
+                if (this.canShutdown) {
+                    clearInterval(timer);
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    private _getListQueryAccess(authUser: AuthUser) {
+        const type = this._getUserType(authUser);
+        const clientId = this._getUserClientId(authUser);
+
+        if (type === DATAADMIN) {
+            throw new ts.TSError('User does not have permission to read lists', {
+                statusCode: 403,
+            });
+        }
+
+        let constraint = '';
+        if (clientId > 0) {
+            constraint += `client_id:"${clientId}"`;
+        }
+
+        const restrictedTypes = [USER];
+        if (restrictedTypes.includes(type)) {
+            if (constraint && authUser) constraint += ` AND users: ${authUser.id}`;
+        }
+
+        return this._queryAccess.make<List>(
+            {
+                constraint,
+                allow_implicit_queries: true,
+            },
+            this.logger
+        );
     }
 }
